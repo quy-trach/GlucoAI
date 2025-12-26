@@ -5,31 +5,34 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String _baseUrl = "http://192.168.1.5:8000";
-  Future<Map<String, dynamic>> predictDiabetes(Map<String, double> data) async {
-    final url = Uri.parse("$_baseUrl/predict");
-    
-    try {
-      debugPrint("🚀 Đang gửi dữ liệu đến: $url");
-      debugPrint("📦 Data: $data");
+  // THAY ĐỔI TẠI ĐÂY: Dùng URL chính thức từ Hugging Face của bạn
+  // Lưu ý: Đảm bảo URL có https:// và KHÔNG có dấu / ở cuối
+  static const String baseUrl = "https://quy-glucoai-api.hf.space"; 
 
+  Future<Map<String, dynamic>> predictDiabetes(Map<String, double> data) async {
+    final url = Uri.parse("$baseUrl/predict");
+
+    try {
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          // Hugging Face đôi khi yêu cầu Accept header
+          "Accept": "application/json", 
+        },
         body: jsonEncode(data),
-      );
-
-      debugPrint("📩 Server phản hồi: ${response.statusCode}");
+      ).timeout(const Duration(seconds: 30)); // Tăng timeout vì HF Free có thể khởi động chậm
 
       if (response.statusCode == 200) {
-        // Thành công!
         return jsonDecode(response.body);
       } else {
-        throw Exception("Lỗi Server: ${response.statusCode}");
+        // Log lỗi chi tiết để dễ debug
+        debugPrint("❌ Server Error: ${response.statusCode} - ${response.body}");
+        throw Exception("Lỗi server (${response.statusCode})");
       }
     } catch (e) {
-      debugPrint("❌ Lỗi kết nối: $e");
-      throw Exception("Không kết nối được với Server. Hãy kiểm tra IP và Wifi.");
+      debugPrint("❌ Connection Error: $e");
+      rethrow;
     }
   }
 }
