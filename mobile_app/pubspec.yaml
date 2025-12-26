@@ -1,0 +1,55 @@
+# Định nghĩa gói ứng dụng di động GlucoAI
+name: glucoai
+description: Ứng dụng dự đoán nguy cơ mắc bệnh tiểu đường bằng AI
+publish_to: 'none'
+version: 1.0.0+1
+
+# Môi trường SDK
+environment:
+  sdk: ^3.10.4
+
+# Thư viện phụ thuộc
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  carousel_slider: ^5.1.1
+  flutter_native_splash: ^2.4.7
+  google_sign_in: ^6.2.1
+  firebase_auth: ^6.1.3
+  firebase_core: ^4.3.0
+  webview_flutter: ^4.7.0
+  http: ^1.6.0
+  google_fonts: ^6.3.3
+
+#  Các thư viện khác có thể được thêm vào đây
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_launcher_icons: ^0.13.1
+  flutter_lints: ^6.0.0
+  lint: ^2.0.1 # Thêm thư viện lint để kiểm tra mã nguồn
+
+# Cấu hình Flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icon/
+
+# Cấu hình biểu tượng ứng dụng
+flutter_icons:
+  android: true
+  ios: false
+  image_path: "assets/images/app_icon.png"
+
+# Màn hình chào (splash screen)
+flutter_native_splash:
+  color: "#007BFF"
+  image: assets/images/bg_glucoAI.png 
+  android_12:
+    image: assets/images/bg_glucoAI.png
+    color: "#007BFF"
+    icon_background_color: "#007BFF" 
+  
+  fullscreen: true

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "260924657426",
+    "project_id": "glucoai-64e3d",
+    "storage_bucket": "glucoai-64e3d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:260924657426:android:32ce8312556f086e5e6dcb",
+        "android_client_info": {
+          "package_name": "com.example.mobile_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATaFWr4DK2MU33kklikAn8EiG0zMfIWDg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
