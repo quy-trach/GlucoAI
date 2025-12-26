@@ -162,3 +162,10 @@ def predict_diabetes(data: PatientData):
         "advice": advice,
         "color_hex": color
     }
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+    # Nếu có biến môi trường PORT (thường trên server), dùng port đó, không thì dùng 8000
+    port = int(os.environ.get("PORT", 7860)) 
+    uvicorn.run(app, host="0.0.0.0", port=port)
