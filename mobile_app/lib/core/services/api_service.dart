@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 class ApiService {
   // THAY ĐỔI TẠI ĐÂY: Dùng URL chính thức từ Hugging Face của bạn
   // Lưu ý: Đảm bảo URL có https:// và KHÔNG có dấu / ở cuối
-  static const String baseUrl = "https://quy-glucoai-api.hf.space"; 
+ static const String baseUrl = "https://quydoantrung-glucoai-api.hf.space";
 
   Future<Map<String, dynamic>> predictDiabetes(Map<String, double> data) async {
     final url = Uri.parse("$baseUrl/predict");
