@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../../../core/services/api_service.dart';
-import 'result_page.dart'; // Chúng ta sẽ tạo file này ở bước 2
+import 'result_page.dart'; 
 
 class LoadingPage extends StatefulWidget {
   final Map<String, double> answers;
@@ -22,34 +22,46 @@ class _LoadingPageState extends State<LoadingPage> {
   }
 
   void _processData() async {
-    // 1. Bắt đầu đếm thời gian tối thiểu (ví dụ 3 giây cho ngầu)
-    // Dù API trả về nhanh thì vẫn bắt đợi đủ 3s mới hiện kết quả
+    // 1. Giả lập độ trễ 3 giây để người dùng thấy hiệu ứng "đang tính toán"
     final minWaitTime = Future.delayed(const Duration(seconds: 3));
 
     try {
-      // 2. Gọi API thực tế song song
+      // 2. Gọi API gửi dữ liệu đi
       final apiCall = ApiService().predictDiabetes(widget.answers);
 
-      // 3. Đợi cả 2 việc xong (Time & API)
+      // 3. Đợi cả 2 việc xong
       final results = await Future.wait([minWaitTime, apiCall]);
       
-      // Lấy kết quả từ API (phần tử thứ 2 trong mảng results)
+      // Lấy kết quả từ API
       final apiResult = results[1] as Map<String, dynamic>;
 
       if (!mounted) return;
 
-      // 4. Chuyển sang trang Kết quả (Xóa trang loading khỏi lịch sử back)
+      // ============================================================
+      // 🔥 BƯỚC QUAN TRỌNG: GỘP BMI VÀO KẾT QUẢ 🔥
+      // ============================================================
+      
+      // Tạo một bản sao của kết quả API (để có thể chỉnh sửa)
+      Map<String, dynamic> finalData = Map.from(apiResult);
+
+      // Lấy chỉ số BMI từ dữ liệu đầu vào (đã tính ở SurveyPage) nhét vào
+      // Nếu không tìm thấy thì mặc định là 0.0
+      finalData['bmi'] = widget.answers['BMI'] ?? 0.0;
+
+      // ============================================================
+
+      // 4. Chuyển sang trang Kết quả với dữ liệu ĐẦY ĐỦ (API + BMI)
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => ResultPage(resultData: apiResult),
+          builder: (context) => ResultPage(resultData: finalData),
         ),
       );
 
     } catch (e) {
-      // Xử lý lỗi
       if (!mounted) return;
-      Navigator.pop(context); // Quay về Survey
+      // Quay về trang trước nếu lỗi
+      Navigator.pop(context); 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Lỗi kết nối: $e"), backgroundColor: Colors.red),
       );
@@ -64,7 +76,7 @@ class _LoadingPageState extends State<LoadingPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ảnh hoặc Icon động
+            // Hiệu ứng Loading
             const SizedBox(
               height: 100,
               width: 100,
@@ -75,6 +87,8 @@ class _LoadingPageState extends State<LoadingPage> {
               ),
             ),
             const SizedBox(height: 30),
+            
+            // Text thông báo
             const Text(
               "AI ĐANG PHÂN TÍCH...",
               style: TextStyle(
