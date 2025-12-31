@@ -30,179 +30,275 @@ class Option {
 // 2. DANH SÁCH CÂU HỎI CHUẨN (FINALIZED)
 // ========================================================
 final List<Question> surveyQuestions = [
-  // --- NHÓM 1: CHỈ SỐ CƠ THỂ (BMI) ---
-  Question(
-    id: "BMI_Group", // ID ảo để gom nhóm
-    text: "Để bắt đầu, vui lòng cho biết chiều cao và cân nặng của {xung_ho}?",
-    type: QuestionType.inputBmi, // Loại đặc biệt: Hiện 2 thanh Slider
-    icon: "scale",
-    // Giá trị sẽ được tính: BMI = Weight / (Height/100)^2
-  ),
-
-  // --- NHÓM 2: TIỀN SỬ BỆNH (QUAN TRỌNG) ---
-  Question(
-    id: "HighBP",
-    text: "Bác sĩ có từng nói {xung_ho} bị cao huyết áp không?",
-    type: QuestionType.yesNo,
-    icon: "blood_pressure",
-    options: [
-      Option("Không, huyết áp ổn định", {"HighBP": 0}),
-      Option("Có, {xung_ho} bị cao huyết áp", {"HighBP": 1}),
-    ],
-  ),
-  Question(
-    id: "HighChol",
-    text: "Kết quả xét nghiệm mỡ máu (Cholesterol) gần đây của {xung_ho} thế nào?",
-    type: QuestionType.yesNo,
-    icon: "cholesterol",
-    options: [
-      Option("Bình thường / Chưa đo", {"HighChol": 0, "CholCheck": 0}), // Gán luôn CholCheck=0 nếu chưa đo
-      Option("Bác sĩ báo Mỡ máu cao", {"HighChol": 1, "CholCheck": 1}),
-    ],
-  ),
-  Question(
-    id: "Heart_Stroke", // Gom tim mạch và đột quỵ cho gọn (hoặc tách nếu muốn kỹ)
-    text: "{xung_ho} đã từng bị đột quỵ hay mắc bệnh tim mạch (nhồi máu cơ tim) chưa?",
-    type: QuestionType.singleChoice,
-    icon: "heart",
-    options: [
-      Option("Tim mạch hoàn toàn khỏe mạnh", {"Stroke": 0, "HeartDiseaseorAttack": 0}),
-      Option("Đã từng bị Đột quỵ", {"Stroke": 1, "HeartDiseaseorAttack": 0}),
-      Option("Có bệnh Tim mạch", {"Stroke": 0, "HeartDiseaseorAttack": 1}),
-      Option("Bị cả hai (Tim mạch & Đột quỵ)", {"Stroke": 1, "HeartDiseaseorAttack": 1}),
-    ],
-  ),
-
-  // --- NHÓM 3: THÓI QUEN SỐNG (GOM NHÓM) ---
-  Question(
-    id: "Diet_Group", // GOM FRUITS + VEGGIES
-    text: "Thói quen ăn uống hàng ngày của {xung_ho} thường như thế nào?",
-    type: QuestionType.singleChoice,
-    icon: "food",
-    options: [
-      Option("Thích đồ ngọt/chiên rán, ít ăn rau củ", {"Fruits": 0, "Veggies": 0}),
-      Option("Ăn uống cân bằng, có rau xanh/trái cây mỗi ngày", {"Fruits": 1, "Veggies": 1}),
-    ],
-  ),
-  Question(
-    id: "Smoker",
-    text: "{xung_ho} có hút thuốc lá không? (Hoặc đã hút trên 100 điếu trong đời)",
-    type: QuestionType.yesNo,
-    icon: "smoking",
-    options: [
-      Option("Không hút thuốc", {"Smoker": 0}),
-      Option("Có hút thuốc", {"Smoker": 1}),
-    ],
-  ),
-  Question(
-    id: "PhysActivity",
-    text: "Trong 30 ngày qua, {xung_ho} có tập thể dục hay vận động chân tay không?",
-    type: QuestionType.yesNo,
-    icon: "running",
-    options: [
-      Option("Rất ít vận động", {"PhysActivity": 0}),
-      Option("Có, vận động/thể dục đều đặn", {"PhysActivity": 1}),
-    ],
-  ),
-   Question(
-    id: "HvyAlcoholConsump",
-    text: "{xung_ho} có thường xuyên uống nhiều rượu bia không?",
-    type: QuestionType.yesNo,
-    icon: "beer",
-    options: [
-      Option("Không / Uống rất ít", {"HvyAlcoholConsump": 0}),
-      Option("Có, uống thường xuyên", {"HvyAlcoholConsump": 1}),
-    ],
-  ),
-
-  // --- NHÓM 4: KINH TẾ & XÃ HỘI (GOM INCOME + EDUCATION) ---
-  // Mẹo: Hỏi về "Công việc & Mức sống" để tế nhị hơn
-  Question(
-    id: "Socio_Group",
-    text: "Nhóm nào dưới đây mô tả đúng nhất về công việc và mức sống hiện tại của {xung_ho}?",
-    type: QuestionType.singleChoice,
-    icon: "work",
-    options: [
-      // Mức 1: Thấp (Lao động phổ thông/Về hưu lương thấp) -> Edu: 2 (Cấp 1-2), Income: 2
-      Option(
-        "Lao động tự do / Về hưu (Mức sống cơ bản)", 
-        {"Education": 2, "Income": 2}
-      ),
-      // Mức 2: Trung bình (Công nhân/NV Văn phòng) -> Edu: 4 (Cấp 3), Income: 4-5
-      Option(
-        "Công nhân / NV Văn phòng / Sinh viên (Mức sống trung bình)", 
-        {"Education": 4, "Income": 5}
-      ),
-      // Mức 3: Khá (Đại học/Quản lý) -> Edu: 6 (Đại học), Income: 7-8
-      Option(
-        "Chuyên viên / Quản lý / Kinh doanh (Mức sống khá giả)", 
-        {"Education": 6, "Income": 8}
-      ),
-    ],
-  ),
-
-  // --- NHÓM 5: TÌNH TRẠNG HIỆN TẠI ---
-  Question(
-    id: "GenHlth",
-    text: "Nhìn chung, {xung_ho} tự đánh giá sức khỏe của mình ở mức nào?",
-    type: QuestionType.singleChoice, // Scale 1-5
-    icon: "health_rating",
-    options: [
-      Option("Tuyệt vời (Rất khỏe)", {"GenHlth": 1}),
-      Option("Rất tốt", {"GenHlth": 2}),
-      Option("Tốt", {"GenHlth": 3}),
-      Option("Bình thường", {"GenHlth": 4}),
-      Option("Kém (Hay đau ốm)", {"GenHlth": 5}),
-    ],
-  ),
-  Question(
-    id: "DiffWalk",
-    text: "{xung_ho} có gặp khó khăn khi đi bộ hoặc leo cầu thang không?",
-    type: QuestionType.yesNo,
-    icon: "walking",
-    options: [
-      Option("Đi lại bình thường", {"DiffWalk": 0}),
-      Option("Có, đi lại khó khăn", {"DiffWalk": 1}),
-    ],
-  ),
-  Question(
-    id: "Mental_Physical_Days", // Hỏi gộp hoặc tách tùy ý, ở đây để input số ngày
-    text: "Trong 30 ngày qua, có bao nhiêu ngày {xung_ho} cảm thấy sức khỏe TÂM LÝ hoặc THỂ CHẤT không tốt?",
-    type: QuestionType.inputDays, // Form nhập 2 ô số: Tâm lý & Thể chất
-    icon: "calendar",
-    // Giá trị trả về: MentHlth (0-30), PhysHlth (0-30)
-  ),
-
-  // --- NHÓM 6: THÔNG TIN CÁ NHÂN (MODEL) ---
+  // --- NHÓM 1: THÔNG TIN CƠ BẢN (DEMOGRAPHICS) ---
   Question(
     id: "Sex",
-    text: "Giới tính sinh học của {xung_ho}?",
+    text: "Giới tính sinh học của {xung_ho} là gì?",
     type: QuestionType.singleChoice,
     icon: "gender",
     options: [
-      Option("Nữ", {"Sex": 0}),
-      Option("Nam", {"Sex": 1}),
+      Option("Nam giới", {"Sex": 1.0}),
+      Option("Nữ giới", {"Sex": 0.0}),
+      Option("Khác (Cơ thể thiên về Nam)", {"Sex": 1.0}),
+      Option("Khác (Cơ thể thiên về Nữ)", {"Sex": 0.0}),
     ],
   ),
+
   Question(
     id: "Age",
-    text: "Cuối cùng, vui lòng chọn nhóm tuổi chính xác của {xung_ho}:",
-    type: QuestionType.singleChoice, // Scale 1-13
-    icon: "age",
+    text: "Độ tuổi hiện tại của {xung_ho} thuộc nhóm nào?",
+    type: QuestionType.singleChoice,
+    icon: "cake",
     options: [
-      Option("18 - 24 tuổi", {"Age": 1}),
-      Option("25 - 29 tuổi", {"Age": 2}),
-      Option("30 - 34 tuổi", {"Age": 3}),
-      Option("35 - 39 tuổi", {"Age": 4}),
-      Option("40 - 44 tuổi", {"Age": 5}),
-      Option("45 - 49 tuổi", {"Age": 6}),
-      Option("50 - 54 tuổi", {"Age": 7}),
-      Option("55 - 59 tuổi", {"Age": 8}),
-      Option("60 - 64 tuổi", {"Age": 9}),
-      Option("65 - 69 tuổi", {"Age": 10}),
-      Option("70 - 74 tuổi", {"Age": 11}),
-      Option("75 - 79 tuổi", {"Age": 12}),
-      Option("80 tuổi trở lên", {"Age": 13}),
+      Option("Thanh niên (Dưới 30 tuổi)", {"Age": 2.0}), // Map tương ứng scale 1-13
+      Option("Trung niên (30 - 45 tuổi)", {"Age": 5.0}),
+      Option("Đứng tuổi (46 - 60 tuổi)", {"Age": 8.0}),
+      Option("Cao tuổi (Trên 60 tuổi)", {"Age": 11.0}),
+    ],
+  ),
+
+  // --- NHÓM 2: CHỈ SỐ CƠ THỂ & TIỀN SỬ (MEDICAL) ---
+  Question(
+    id: "BMI",
+    text: "Vui lòng cung cấp chiều cao và cân nặng để tính chỉ số BMI:",
+    type: QuestionType.inputBmi,
+    icon: "scale",
+  ),
+
+  Question(
+    id: "HighBP",
+    text: "Tình trạng huyết áp của {xung_ho} như thế nào?",
+    type: QuestionType.singleChoice,
+    icon: "blood_pressure",
+    options: [
+      Option("Ổn định / Bình thường", {"HighBP": 0.0}),
+      Option("Hơi cao (Tiền cao huyết áp)", {"HighBP": 0.0}), // Vẫn chưa tính là HighBP theo dataset
+      Option("Cao (Đang dùng thuốc kiểm soát)", {"HighBP": 1.0}),
+      Option("Rất cao / Thường xuyên mất kiểm soát", {"HighBP": 1.0}),
+    ],
+  ),
+
+  Question(
+    id: "HighChol",
+    text: "Chỉ số Cholesterol (mỡ máu) gần nhất của {xung_ho}?",
+    type: QuestionType.singleChoice,
+    icon: "cholesterol",
+    options: [
+      Option("Rất tốt / Dưới mức cảnh báo", {"HighChol": 0.0}),
+      Option("Bình thường", {"HighChol": 0.0}),
+      Option("Cao (Bác sĩ đã cảnh báo)", {"HighChol": 1.0}),
+      Option("Rất cao / Đang điều trị", {"HighChol": 1.0}),
+    ],
+  ),
+
+  Question(
+    id: "CholCheck",
+    text: "Lần cuối {xung_ho} thực hiện xét nghiệm mỡ máu là khi nào?",
+    type: QuestionType.singleChoice,
+    icon: "history",
+    options: [
+      Option("Trong vòng 1 năm qua", {"CholCheck": 1.0}),
+      Option("Khoảng 1-2 năm trước", {"CholCheck": 1.0}),
+      Option("Đã lâu (trên 5 năm) chưa đo", {"CholCheck": 0.0}),
+      Option("Chưa bao giờ xét nghiệm", {"CholCheck": 0.0}),
+    ],
+  ),
+
+  Question(
+    id: "Stroke",
+    text: "{xung_ho} đã từng bị đột quỵ chưa?",
+    type: QuestionType.singleChoice,
+    icon: "brain",
+    options: [
+      Option("Chưa bao giờ", {"Stroke": 0.0}),
+      Option("Có dấu hiệu nhẹ (Thoáng qua)", {"Stroke": 0.0}),
+      Option("Đã từng bị và đã hồi phục", {"Stroke": 1.0}),
+      Option("Đã bị nhiều lần", {"Stroke": 1.0}),
+    ],
+  ),
+
+  Question(
+    id: "HeartDiseaseorAttack",
+    text: "Tiền sử bệnh tim mạch hoặc nhồi máu cơ tim?",
+    type: QuestionType.singleChoice,
+    icon: "heart",
+    options: [
+      Option("Tim mạch khỏe mạnh", {"HeartDiseaseorAttack": 0.0}),
+      Option("Hay bị đau thắt ngực", {"HeartDiseaseorAttack": 0.0}),
+      Option("Có bệnh lý mạch vành", {"HeartDiseaseorAttack": 1.0}),
+      Option("Đã từng bị nhồi máu cơ tim", {"HeartDiseaseorAttack": 1.0}),
+    ],
+  ),
+
+  // --- NHÓM 3: LỐI SỐNG (LIFESTYLE) ---
+  Question(
+    id: "Smoker",
+    text: "Thói quen hút thuốc lá của {xung_ho}?",
+    type: QuestionType.singleChoice,
+    icon: "smoking",
+    options: [
+      Option("Không bao giờ hút", {"Smoker": 0.0}),
+      Option("Đã từng hút nhưng đã bỏ", {"Smoker": 0.0}),
+      Option("Thỉnh thoảng mới hút", {"Smoker": 1.0}),
+      Option("Hút thường xuyên (trên 100 điếu)", {"Smoker": 1.0}),
+    ],
+  ),
+
+  Question(
+    id: "PhysActivity",
+    text: "Mức độ vận động thể chất hàng tuần?",
+    type: QuestionType.singleChoice,
+    icon: "fitness",
+    options: [
+      Option("Tập thể dục đều đặn hàng ngày", {"PhysActivity": 1.0}),
+      Option("Tập 3-4 buổi/tuần", {"PhysActivity": 1.0}),
+      Option("Ít vận động (1 lần/tuần)", {"PhysActivity": 0.0}),
+      Option("Hoàn toàn không vận động", {"PhysActivity": 0.0}),
+    ],
+  ),
+
+  Question(
+    id: "Fruits",
+    text: "{xung_ho} có ăn trái cây thường xuyên không?",
+    type: QuestionType.singleChoice,
+    icon: "apple",
+    options: [
+      Option("Ăn nhiều lần trong ngày", {"Fruits": 1.0}),
+      Option("Ít nhất 1 quả mỗi ngày", {"Fruits": 1.0}),
+      Option("Vài ngày mới ăn một lần", {"Fruits": 0.0}),
+      Option("Rất hiếm khi ăn trái cây", {"Fruits": 0.0}),
+    ],
+  ),
+
+  Question(
+    id: "Veggies",
+    text: "Thói quen ăn rau xanh hàng ngày?",
+    type: QuestionType.singleChoice,
+    icon: "leaf",
+    options: [
+      Option("Luôn có rau trong mọi bữa ăn", {"Veggies": 1.0}),
+      Option("Ăn rau ít nhất 1 lần/ngày", {"Veggies": 1.0}),
+      Option("Thỉnh thoảng mới ăn", {"Veggies": 0.0}),
+      Option("Hầu như không ăn rau", {"Veggies": 0.0}),
+    ],
+  ),
+
+  Question(
+    id: "HvyAlcoholConsump",
+    text: "Mức độ sử dụng rượu bia hàng tuần?",
+    type: QuestionType.singleChoice,
+    icon: "alcohol",
+    options: [
+      Option("Không uống / Cực kỳ hiếm", {"HvyAlcoholConsump": 0.0}),
+      Option("Uống xã giao (ít)", {"HvyAlcoholConsump": 0.0}),
+      Option("Nam >14 ly / Nữ >7 ly mỗi tuần", {"HvyAlcoholConsump": 1.0}),
+      Option("Uống thường xuyên mỗi ngày", {"HvyAlcoholConsump": 1.0}),
+    ],
+  ),
+
+  // --- NHÓM 4: SỨC KHỎE TỔNG QUÁT ---
+  Question(
+    id: "GenHlth",
+    text: "Tự đánh giá sức khỏe tổng quát hiện tại?",
+    type: QuestionType.singleChoice,
+    icon: "health_card",
+    options: [
+      Option("Tuyệt vời (Rất khỏe)", {"GenHlth": 1.0}),
+      Option("Tốt / Khá", {"GenHlth": 2.0}),
+      Option("Bình thường", {"GenHlth": 3.0}),
+      Option("Kém (Hay mệt mỏi/đau ốm)", {"GenHlth": 5.0}),
+    ],
+  ),
+
+  Question(
+    id: "MentHlth",
+    text: "Trong 30 ngày qua, số ngày sức khỏe tâm thần kém?",
+    type: QuestionType.singleChoice,
+    icon: "mental",
+    options: [
+      Option("Không có ngày nào (0 ngày)", {"MentHlth": 0.0}),
+      Option("Khoảng 1 tuần (1-7 ngày)", {"MentHlth": 5.0}),
+      Option("Khoảng nửa tháng (15 ngày)", {"MentHlth": 15.0}),
+      Option("Gần như cả tháng (trên 25 ngày)", {"MentHlth": 30.0}),
+    ],
+  ),
+
+  Question(
+    id: "PhysHlth",
+    text: "Trong 30 ngày qua, số ngày sức khỏe thể chất kém?",
+    type: QuestionType.singleChoice,
+    icon: "body",
+    options: [
+      Option("Hoàn toàn khỏe mạnh (0 ngày)", {"PhysHlth": 0.0}),
+      Option("Bị mệt/ốm vài ngày (1-5 ngày)", {"PhysHlth": 3.0}),
+      Option("Ốm khoảng nửa tháng", {"PhysHlth": 15.0}),
+      Option("Ốm yếu cả tháng", {"PhysHlth": 30.0}),
+    ],
+  ),
+
+  Question(
+    id: "DiffWalk",
+    text: "{xung_ho} có gặp khó khăn khi đi bộ hoặc leo cầu thang?",
+    type: QuestionType.singleChoice,
+    icon: "walk",
+    options: [
+      Option("Đi lại chạy nhảy bình thường", {"DiffWalk": 0.0}),
+      Option("Hơi khó khăn khi leo cao", {"DiffWalk": 0.0}),
+      Option("Khó đi bộ đoạn dài", {"DiffWalk": 1.0}),
+      Option("Cần dụng cụ hỗ trợ / Xe lăn", {"DiffWalk": 1.0}),
+    ],
+  ),
+
+  // --- NHÓM 5: KINH TẾ & Y TẾ ---
+  Question(
+    id: "AnyHealthcare",
+    text: "{xung_ho} có đang sử dụng bảo hiểm y tế không?",
+    type: QuestionType.singleChoice,
+    icon: "insurance",
+    options: [
+      Option("Có BH bắt buộc/tự nguyện", {"AnyHealthcare": 1.0}),
+      Option("Có BH cao cấp/Quốc tế", {"AnyHealthcare": 1.0}),
+      Option("Sắp hết hạn / Đang chờ cấp", {"AnyHealthcare": 0.0}),
+      Option("Không có bảo hiểm", {"AnyHealthcare": 0.0}),
+    ],
+  ),
+
+  Question(
+    id: "NoDocbcCost",
+    text: "{xung_ho} có từng bỏ khám vì lo ngại viện phí?",
+    type: QuestionType.singleChoice,
+    icon: "cost",
+    options: [
+      Option("Chưa bao giờ lo lắng", {"NoDocbcCost": 0.0}),
+      Option("Đôi khi thấy tốn kém", {"NoDocbcCost": 0.0}),
+      Option("Thường xuyên bỏ khám vì tiền", {"NoDocbcCost": 1.0}),
+      Option("Không đủ khả năng chi trả", {"NoDocbcCost": 1.0}),
+    ],
+  ),
+
+  Question(
+    id: "Education",
+    text: "Trình độ học vấn cao nhất {xung_ho} đạt được?",
+    type: QuestionType.singleChoice,
+    icon: "school",
+    options: [
+      Option("Sau Đại học / Chuyên gia", {"Education": 6.0}),
+      Option("Đại học / Cao đẳng", {"Education": 5.0}),
+      Option("Trung cấp / Cấp 3", {"Education": 4.0}),
+      Option("Dưới cấp 3", {"Education": 2.0}),
+    ],
+  ),
+
+  Question(
+    id: "Income",
+    text: "Mức thu nhập hàng tháng của {xung_ho}?",
+    type: QuestionType.singleChoice,
+    icon: "income",
+    options: [
+      Option("Dư dả (Trên 30 triệu)", {"Income": 8.0}),
+      Option("Khá (15 - 30 triệu)", {"Income": 6.0}),
+      Option("Trung bình (7 - 15 triệu)", {"Income": 4.0}),
+      Option("Thấp (Dưới 7 triệu)", {"Income": 2.0}),
     ],
   ),
 ];

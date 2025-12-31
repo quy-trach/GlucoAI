@@ -4,168 +4,95 @@ import joblib
 import pandas as pd
 import numpy as np
 import os
-from fastapi.middleware.cors import CORSMiddleware # Thêm dòng này
+from fastapi.middleware.cors import CORSMiddleware
 
-# =======================================================
-# CONFIG & KHỞI TẠO
-# =======================================================
-app = FastAPI(title="GlucoAI - Hugging Face Cloud")
+app = FastAPI(title="GlucoAI - Local Server")
 
-# Cấu hình CORS để App Flutter có thể kết nối
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Cho phép tất cả các nguồn
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Sử dụng đường dẫn tương đối dựa trên vị trí file hiện tại
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, "models")
 
-print("⏳ Đang khởi động Server và tải Model...")
-
-preprocessor = None
-xgb_model = None
-
-# =======================================================
-# 1. LOAD MODEL
-# =======================================================
+# Load Model (Thêm try-except để không crash nếu thiếu file)
 try:
-    prep_path = os.path.join(MODEL_DIR, "preprocessor_optimal_20251220_103654.joblib")
-    if os.path.exists(prep_path):
-        raw_prep = joblib.load(prep_path)
-        if hasattr(raw_prep, "transform"):
-            preprocessor = raw_prep
-        elif isinstance(raw_prep, list):
-            for item in raw_prep:
-                if hasattr(item, "transform") or hasattr(item, "fit_transform"):
-                    preprocessor = item
-                    break
-        print("✅ Đã tải Preprocessor.")
+    preprocessor = joblib.load(os.path.join(MODEL_DIR, "preprocessor_optimal_20251220_103654.joblib"))
+    xgb_model = joblib.load(os.path.join(MODEL_DIR, "xgb_model_20251220_103729.pkl"))
+    print("✅ Đã tải Model & Preprocessor thành công!")
+except:
+    print("⚠️ Không tìm thấy Model! Đang chạy chế độ giả lập (Dummy Mode).")
+    preprocessor = None
+    xgb_model = None
 
-    model_path = os.path.join(MODEL_DIR, "xgb_model_20251220_103729.pkl")
-    if os.path.exists(model_path):
-        xgb_model = joblib.load(model_path)
-        print("✅ Đã tải XGBoost Model.")
-except Exception as e:
-    print(f"❌ LỖI KHỞI TẠO: {e}")
-
-# Thêm endpoint này để kiểm tra trên trình duyệt
-@app.get("/")
-def home():
-    return {"message": "GlucoAI Service is Running!", "model_loaded": xgb_model is not None}
-
-# =======================================================
-# 2. DATA MODEL
-# =======================================================
 class PatientData(BaseModel):
-    HighBP: float
-    HighChol: float
-    CholCheck: float
-    BMI: float
-    Smoker: float
-    Stroke: float
-    HeartDiseaseorAttack: float
-    PhysActivity: float
-    Fruits: float
-    Veggies: float
-    HvyAlcoholConsump: float
-    AnyHealthcare: float
-    NoDocbcCost: float
-    GenHlth: float
-    MentHlth: float
-    PhysHlth: float
-    DiffWalk: float
-    Sex: float
-    Age: float
-    Education: float
-    Income: float
+    HighBP: float; HighChol: float; CholCheck: float; BMI: float
+    Smoker: float; Stroke: float; HeartDiseaseorAttack: float
+    PhysActivity: float; Fruits: float; Veggies: float
+    HvyAlcoholConsump: float; AnyHealthcare: float; NoDocbcCost: float
+    GenHlth: float; MentHlth: float; PhysHlth: float; DiffWalk: float
+    Sex: float; Age: float; Education: float; Income: float
 
-# =======================================================
-# 3. API DỰ ĐOÁN (Giữ nguyên logic của bạn)
-# =======================================================
 @app.post("/predict")
 def predict_diabetes(data: PatientData):
     input_dict = data.dict()
-    
-    # Logic tính Risk Score
+    print(f"📥 Nhận dữ liệu từ App: BMI={input_dict['BMI']}, Tuổi={input_dict['Age']}")
+
+    # 1. Tính điểm rủi ro (Risk Score)
     risk_score = 0
-    if input_dict['BMI'] >= 30: risk_score += 2
-    if input_dict['HighBP'] == 1: risk_score += 2
-    if input_dict['HeartDiseaseorAttack'] == 1: risk_score += 3
-    if input_dict['GenHlth'] >= 4: risk_score += 2 
+    if input_dict['HighBP'] == 1: risk_score += 3
+    if input_dict['HighChol'] == 1: risk_score += 3
+    if input_dict['BMI'] >= 30: risk_score += 3
+    if input_dict['GenHlth'] >= 4: risk_score += 2
+    if input_dict['Age'] >= 9: risk_score += 2
+    if input_dict['HeartDiseaseorAttack'] == 1: risk_score += 2
+    if input_dict['PhysHlth'] >= 15: risk_score += 1
+    if input_dict['DiffWalk'] == 1: risk_score += 1
+
+    # 2. AI Dự đoán (Lấy số lẻ)
+    ai_prob = 0.5
+    if xgb_model:
+        cols = ["HighBP", "HighChol", "CholCheck", "BMI", "Smoker", "Stroke", 
+                "HeartDiseaseorAttack", "PhysActivity", "Fruits", "Veggies", 
+                "HvyAlcoholConsump", "AnyHealthcare", "NoDocbcCost", "GenHlth", 
+                "MentHlth", "PhysHlth", "DiffWalk", "Sex", "Age", "Education", "Income"]
+        df = pd.DataFrame([input_dict])[cols]
+        processed = preprocessor.transform(df) if preprocessor else df.values
+        ai_prob = float(xgb_model.predict_proba(processed)[0][1])
+
+    # 3. CÔNG THỨC PHA TRỘN (Đảm bảo ra số tự nhiên)
+    # Tỷ lệ: 70% tin AI + 30% tin vào Risk Score
+    clinical_prob = min(risk_score / 18.0, 1.0)
     
-    age_val = input_dict['Age']
-    is_old = False
-    if age_val > 1000: 
-        if (2025 - age_val) >= 55:
-            risk_score += 2
-            is_old = True
-    elif age_val >= 8:
-        risk_score += 2
-        is_old = True
+    final_prob = (ai_prob * 0.7) + (clinical_prob * 0.3)
 
-    prob_risk = 0.25 
-    
-    try:
-        if xgb_model and preprocessor:
-            cols = ["HighBP", "HighChol", "CholCheck", "BMI", "Smoker", 
-                    "Stroke", "HeartDiseaseorAttack", "PhysActivity", "Fruits", 
-                    "Veggies", "HvyAlcoholConsump", "AnyHealthcare", "NoDocbcCost", 
-                    "GenHlth", "MentHlth", "PhysHlth", "DiffWalk", "Sex", "Age", 
-                    "Education", "Income"]
-            df = pd.DataFrame([input_dict])[cols]
-            
-            try:
-                processed_data = preprocessor.transform(df)
-            except:
-                features = df.values
-                zeros = np.zeros((1, 26 - features.shape[1]))
-                processed_data = np.hstack((features, zeros))
+    # In ra Terminal để kiểm chứng số lẻ
+    print(f"🧮 TÍNH TOÁN: AI({ai_prob:.3f}) + Risk({clinical_prob:.3f}) = FINAL({final_prob:.3f})")
 
-            probs = xgb_model.predict_proba(processed_data)
-            prob_risk = float(probs[0][1])
-
-    except Exception as e:
-        print(f"❌ Lỗi AI: {e}")
-
-    final_prob = prob_risk
-
-    if risk_score >= 5:
-        final_prob = max(final_prob, 0.75)
-    elif 3 <= risk_score <= 4:
-        if final_prob < 0.35: final_prob = 0.45
-        elif final_prob >= 0.50: final_prob = 0.49
-    elif risk_score < 3 and not is_old:
-        final_prob = min(final_prob, 0.15)
-
-    prob_safe = 1.0 - final_prob
-    
-    if final_prob < 0.30:
+    # 4. Phân loại kết quả
+    if final_prob < 0.35:
         level, label, color = 0, "An toàn", "#4CAF50"
-        advice = "Chỉ số tốt! Hãy duy trì lối sống lành mạnh."
-    elif final_prob < 0.50:
+        advice = "Chỉ số rất tốt. Hãy duy trì nhé!"
+    elif final_prob < 0.65:
         level, label, color = 1, "Cảnh báo", "#FFC107"
-        advice = "Có dấu hiệu rủi ro. Nên giảm đường/tinh bột và tập thể dục."
+        advice = "Có nguy cơ. Nên thay đổi lối sống ngay."
     else:
         level, label, color = 2, "Nguy cơ cao", "#F44336"
-        advice = "Nguy cơ tiểu đường cao. Bạn cần đi khám bác sĩ chuyên khoa."
+        advice = "Nguy hiểm! Cần đi khám bác sĩ."
 
     return {
-        "status": "success",
         "prediction_level": level,
-        "prob_risk": final_prob,
-        "prob_safe": prob_safe,
+        "prob_risk": final_prob, 
+        "prob_safe": 1.0 - final_prob,
         "label": label,
-        "advice": advice,
-        "color_hex": color
+        "color_hex": color,
+        "advice": advice
     }
 
 if __name__ == "__main__":
     import uvicorn
-    import os
-    # Nếu có biến môi trường PORT (thường trên server), dùng port đó, không thì dùng 8000
-    port = int(os.environ.get("PORT", 7860)) 
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=7860)
