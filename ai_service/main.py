@@ -143,7 +143,7 @@ def predict_diabetes(data: PatientData):
     # Xử lý Logic Tuổi (Năm sinh vs Thang đo)
     age_val = input_dict['Age']
     is_old = False
-    current_year = 2026 # Cập nhật năm hiện tại cho chính xác
+    current_year = 2026 
     
     if age_val > 1000: # Nhập năm sinh (VD: 1970)
         if (current_year - age_val) >= 55:
@@ -198,20 +198,20 @@ def predict_diabetes(data: PatientData):
     # --- BƯỚC 3: HYBRID LOGIC (HẬU XỬ LÝ) ---
     final_prob = prob_risk
 
-    # Rule A: Risk cao (>=5) mà AI đánh thấp (<25%) -> Kéo lên
-    if risk_score >= 5 and prob_risk < 0.25:
+  # Rule A: Risk cao (>=5) mà AI đánh thấp (< 35%) -> Kéo lên
+    if risk_score >= 5 and prob_risk < 0.35:
         print("⚠️ [HYBRID] Risk cao nhưng AI thấp -> Force High Risk")
         final_prob = 0.75
         prob_safe = 0.25
 
-    # Rule B: Risk thấp (<3), Trẻ, mà AI đánh cao (>20%) -> Kéo xuống
-    if risk_score < 3 and not is_old and prob_risk > 0.20:
+   # Rule B: Risk thấp (<3), Trẻ, mà AI đánh hơi cao (> 35%) -> Kéo xuống
+    if risk_score < 3 and not is_old and prob_risk > 0.35:
         print("🛡️ [HYBRID] Người khỏe nhưng AI cao -> Force Low Risk")
         final_prob = 0.15
         prob_safe = 0.85
 
     # --- BƯỚC 4: KẾT QUẢ CUỐI CÙNG ---
-    is_sick = 1 if final_prob >= 0.20 else 0 # Ngưỡng cắt 20%
+    is_sick = 1 if final_prob >= 0.30 else 0 # Ngưỡng cắt 20%
 
     return {
         "status": "success",

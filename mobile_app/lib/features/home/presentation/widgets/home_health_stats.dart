@@ -2,53 +2,99 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 class HomeHealthStats extends StatelessWidget {
-  const HomeHealthStats({super.key});
+  // Dữ liệu từ Firebase truyền vào
+  final Map<String, dynamic>? data;
+
+  const HomeHealthStats({super.key, this.data});
 
   @override
   Widget build(BuildContext context) {
-    // Dữ liệu (Giữ nguyên)
+    // Nếu chưa có dữ liệu, dùng dữ liệu mặc định rỗng
+    final inputs = data?['input_data'] ?? {};
+    final bmiVal = data?['bmi'] ?? 0.0;
+
+    // --- LOGIC CHUYỂN ĐỔI DỮ LIỆU ---
+    
+    // 1. Xử lý Vận động
+    String physStatus = "Chưa rõ";
+    if (inputs['PhysActivity'] != null) {
+      physStatus = (inputs['PhysActivity'] == 1) ? "Tích cực" : "Ít vận động";
+    }
+
+    // 2. Xử lý Ăn uống
+    String dietStatus = "Chưa rõ";
+    if (inputs['Veggies'] != null && inputs['Fruits'] != null) {
+      bool hasVeggies = inputs['Veggies'] == 1;
+      bool hasFruits = inputs['Fruits'] == 1;
+      
+      if (hasVeggies && hasFruits) {
+        dietStatus = "Lành mạnh";
+      } else if (hasVeggies || hasFruits) {
+        dietStatus = "Khá tốt";
+      } else {
+        dietStatus = "Thiếu rau";
+      }
+    }
+
+    // 3. Xử lý Sức khỏe chung (GenHlth: 1-Excellent -> 5-Poor)
+    // ĐÃ SỬA: Thêm ngoặc nhọn {} đầy đủ
+    String healthGen = "---";
+    if (inputs['GenHlth'] != null) {
+      int gen = (inputs['GenHlth'] as num).toInt();
+      if (gen <= 1) {
+        healthGen = "Tuyệt vời";
+      } else if (gen <= 2) {
+        healthGen = "Rất tốt";
+      } else if (gen <= 3) {
+        healthGen = "Bình thường";
+      } else {
+        healthGen = "Cần chú ý";
+      }
+    }
+
+    // --- DANH SÁCH HIỂN THỊ ---
     final List<Map<String, String?>> statsData = [
       {
-        "label": "BMI",
-        "value": "23.1",
+        "label": "Chỉ số BMI",
+        "value": (bmiVal > 0) ? bmiVal.toStringAsFixed(1) : "--",
         "unit": "kg/m²",
         "icon": "assets/icon/icon_bmi.png"
       },
       {
-        "label": "Vòng bụng",
-        "value": "85",
-        "unit": "cm",
-        "icon": "assets/icon/icon_waist.png"
-      },
-      {
-        "label": "Cân nặng",
-        "value": "70",
-        "unit": "kg",
-        "icon": "assets/icon/icon_weight.png"
-      },
-      {
-        "label": "Huyết áp",
-        "value": "120/80",
-        "unit": "mmHg",
+        "label": "Tiền sử HA",
+        "value": (inputs['HighBP'] == 1) ? "Có cao HA" : "Bình thường",
+        "unit": "Tình trạng",
         "icon": "assets/icon/icon_blood_pressure.png"
       },
       {
         "label": "Vận động",
-        "value": "30",
-        "unit": "phút/ngày",
+        "value": physStatus,
+        "unit": "Thói quen",
         "icon": "assets/icon/icon_run.png"
+      },
+      {
+        "label": "Chế độ ăn",
+        "value": dietStatus,
+        "unit": "Dinh dưỡng",
+        "icon": "assets/icon/icon_nutrition.png"
+      },
+      {
+        "label": "Sức khỏe chung",
+        "value": healthGen,
+        "unit": "Tự đánh giá",
+        "icon": "assets/icon/icon_heart_small.png"
       },
     ];
 
     return CarouselSlider.builder(
       itemCount: statsData.length,
       options: CarouselOptions(
-        height: 165, // Tăng nhẹ từ 160 lên 165 để an toàn hơn
+        height: 165,
         enlargeCenterPage: true,
-        enlargeFactor: 0.2, // Giảm từ 0.25 xuống 0.2 để các item bên cạnh đỡ bị bóp méo quá nhiều
-        viewportFraction: 0.38, // Tăng nhẹ để thẻ to hơn chút
+        enlargeFactor: 0.2,
+        viewportFraction: 0.38,
         enableInfiniteScroll: false,
-        initialPage: 1,
+        initialPage: 0, 
         scrollPhysics: const BouncingScrollPhysics(),
         padEnds: true,
       ),
@@ -65,6 +111,7 @@ class HomeHealthStats extends StatelessWidget {
   }
 }
 
+// --- WIDGET CARD CON ---
 class StatCard extends StatelessWidget {
   final String label;
   final String value;
@@ -81,10 +128,17 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Color valueColor = Colors.black87;
+    if (value == "Có cao HA" || value == "Thiếu rau" || value == "Ít vận động") {
+      valueColor = Colors.orange.shade800;
+    } else if (value == "Lành mạnh" || value == "Tích cực") {
+      valueColor = Colors.green.shade700;
+    }
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-      padding: const EdgeInsets.all(8), // Giảm padding chút cho đỡ chật
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -96,40 +150,33 @@ class StatCard extends StatelessWidget {
           ),
         ],
       ),
-      // --- PHẦN QUAN TRỌNG NHẤT ---
-      // Căn giữa nội dung
       alignment: Alignment.center, 
       child: FittedBox(
-        // FittedBox: "Thần chú" chống tràn. 
-        // Nó sẽ scale nội dung nhỏ lại nếu thẻ bị bé đi.
         fit: BoxFit.scaleDown, 
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Icon
             Image.asset(
               iconPath,
               width: 34, 
               height: 34,
               fit: BoxFit.contain,
-              gaplessPlayback: true,
               errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.broken_image, size: 34, color: Colors.grey),
+                  const Icon(Icons.info, size: 34, color: Colors.grey),
             ),
             
-            const SizedBox(height: 6), // Giảm khoảng cách chút
+            const SizedBox(height: 8),
 
-            // Giá trị (Value)
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 18,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
                 fontWeight: FontWeight.w800,
-                color: Colors.black87,
+                color: valueColor,
               ),
             ),
 
-            // Đơn vị (Unit)
             if (unit != null) ...[
               const SizedBox(height: 2),
               Text(
@@ -140,7 +187,6 @@ class StatCard extends StatelessWidget {
 
             const SizedBox(height: 4),
 
-            // Label
             Text(
               label,
               style: const TextStyle(

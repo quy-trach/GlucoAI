@@ -21,6 +21,10 @@ dependencies:
   webview_flutter: ^4.7.0
   http: ^1.6.0
   google_fonts: ^6.3.3
+  cloud_firestore: ^6.1.1
+  intl: ^0.20.2
+  fl_chart: ^1.1.1
+  animated_text_kit: ^4.3.0
 
 #  Các thư viện khác có thể được thêm vào đây
 dev_dependencies:
@@ -29,13 +33,13 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^6.0.0
   lint: ^2.0.1 # Thêm thư viện lint để kiểm tra mã nguồn
-
 # Cấu hình Flutter
 flutter:
   uses-material-design: true
   assets:
     - assets/images/
     - assets/icon/
+    - assets/articles/
 
 # Cấu hình biểu tượng ứng dụng
 flutter_icons:

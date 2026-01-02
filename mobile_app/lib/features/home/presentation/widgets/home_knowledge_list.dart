@@ -41,11 +41,11 @@ class HomeKnowledgeItem extends StatelessWidget {
                 color: bgColor,
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: const EdgeInsets.all(12),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.contain,
-              ),
+              padding: const EdgeInsets.all(
+                0,
+              ), 
+              clipBehavior: Clip.hardEdge, // Cắt ảnh nếu tràn viền
+              child: _buildImage(imagePath), // <--- GỌI HÀM XỬ LÝ ẢNH Ở ĐÂY
             ),
             const SizedBox(width: 12),
             // Title
@@ -67,5 +67,34 @@ class HomeKnowledgeItem extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildImage(String path) {
+    // TRƯỜNG HỢP 1: Nếu là link Online (http/https)
+    if (path.startsWith('http')) {
+      return Image.network(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(Icons.broken_image, color: Colors.grey);
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+        },
+      );
+    } 
+    
+    // TRƯỜNG HỢP 2: Nếu là ảnh trong máy (assets/)
+    else {
+      return Image.asset(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          // Nếu lỡ trên Firebase gõ sai tên ảnh assets thì hiện icon lỗi
+          return const Icon(Icons.image_not_supported, color: Colors.grey);
+        },
+      );
+    }
   }
 }
