@@ -245,9 +245,9 @@ class _AccountPageState extends State<AccountPage> {
                         children: [
                           _buildInfoRow(Icons.psychology, "Mô hình", "XGBoost & Neural Network"),
                           const Divider(height: 24, thickness: 0.5),
-                          _buildInfoRow(Icons.data_usage, "Dữ liệu", "Pima Indians Diabetes Dataset"),
+                          _buildInfoRow(Icons.data_usage, "Dữ liệu", "BRFSS Annual Survey Data"),
                           const Divider(height: 24, thickness: 0.5),
-                          _buildInfoRow(Icons.verified, "Độ chính xác", "~89.5% (Kiểm thử)"),
+                          _buildInfoRow(Icons.verified, "Hiệu suất", "~89.5% (Kiểm thử)"),
                           const Divider(height: 24, thickness: 0.5),
                           _buildInfoRow(Icons.security, "Bảo mật", "Mã hóa cục bộ"),
                         ],

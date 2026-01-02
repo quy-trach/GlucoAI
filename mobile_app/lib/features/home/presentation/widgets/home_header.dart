@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../support/presentation/pages/chat_page.dart'; 
-
+import 'home_running_searchbar.dart';
 class HomeSliverHeader extends StatelessWidget {
   const HomeSliverHeader({super.key});
 
@@ -141,32 +141,7 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
             right: 16,
             child: SizedBox(
               height: 45,
-              child: TextField(
-                style: const TextStyle(fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: 'Tìm kiếm...',
-                  hintStyle: TextStyle(
-                    color: Colors.grey.shade400,
-                    fontSize: 14,
-                  ),
-                  prefixIcon: const Icon(
-                    Icons.search,
-                    color: Colors.grey,
-                    size: 22,
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 0,
-                    horizontal: 12,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
+             child: RunningSearchBar(),
             ),
           ),
         ],
