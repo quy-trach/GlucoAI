@@ -2,26 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 class HomeHealthStats extends StatelessWidget {
-  // Dữ liệu từ Firebase truyền vào
   final Map<String, dynamic>? data;
 
   const HomeHealthStats({super.key, this.data});
 
-  @override
-  Widget build(BuildContext context) {
-    // Nếu chưa có dữ liệu, dùng dữ liệu mặc định rỗng
+  // --- TÁCH LOGIC XỬ LÝ DỮ LIỆU RA HÀM RIÊNG ---
+  List<Map<String, String?>> _processData() {
     final inputs = data?['input_data'] ?? {};
     final bmiVal = data?['bmi'] ?? 0.0;
 
-    // --- LOGIC CHUYỂN ĐỔI DỮ LIỆU ---
-    
-    // 1. Xử lý Vận động
+    // 1. Vận động
     String physStatus = "Chưa rõ";
     if (inputs['PhysActivity'] != null) {
       physStatus = (inputs['PhysActivity'] == 1) ? "Tích cực" : "Ít vận động";
     }
 
-    // 2. Xử lý Ăn uống
+    // 2. Ăn uống
     String dietStatus = "Chưa rõ";
     if (inputs['Veggies'] != null && inputs['Fruits'] != null) {
       bool hasVeggies = inputs['Veggies'] == 1;
@@ -36,11 +32,11 @@ class HomeHealthStats extends StatelessWidget {
       }
     }
 
-    // 3. Xử lý Sức khỏe chung (GenHlth: 1-Excellent -> 5-Poor)
-    // ĐÃ SỬA: Thêm ngoặc nhọn {} đầy đủ
+    // 3. Sức khỏe chung
     String healthGen = "---";
     if (inputs['GenHlth'] != null) {
       int gen = (inputs['GenHlth'] as num).toInt();
+      // 🔥 ĐÃ SỬA: Thêm ngoặc nhọn {} cho các dòng if/else
       if (gen <= 1) {
         healthGen = "Tuyệt vời";
       } else if (gen <= 2) {
@@ -52,8 +48,7 @@ class HomeHealthStats extends StatelessWidget {
       }
     }
 
-    // --- DANH SÁCH HIỂN THỊ ---
-    final List<Map<String, String?>> statsData = [
+    return [
       {
         "label": "Chỉ số BMI",
         "value": (bmiVal > 0) ? bmiVal.toStringAsFixed(1) : "--",
@@ -82,21 +77,26 @@ class HomeHealthStats extends StatelessWidget {
         "label": "Sức khỏe chung",
         "value": healthGen,
         "unit": "Tự đánh giá",
-        "icon": "assets/icon/icon_heart_small.png"
+        "icon": "assets/icon/medical _summary.png"
       },
     ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Map<String, String?>> statsData = _processData();
 
     return CarouselSlider.builder(
       itemCount: statsData.length,
       options: CarouselOptions(
         height: 165,
+        enableInfiniteScroll: true,
         enlargeCenterPage: true,
-        enlargeFactor: 0.2,
-        viewportFraction: 0.38,
-        enableInfiniteScroll: false,
-        initialPage: 0, 
+        enlargeFactor: 0.25,
+        viewportFraction: 0.4,
+        initialPage: 0,
         scrollPhysics: const BouncingScrollPhysics(),
-        padEnds: true,
+        autoPlay: false,
       ),
       itemBuilder: (context, index, realIndex) {
         final item = statsData[index];
@@ -129,74 +129,77 @@ class StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color valueColor = Colors.black87;
-    if (value == "Có cao HA" || value == "Thiếu rau" || value == "Ít vận động") {
-      valueColor = Colors.orange.shade800;
-    } else if (value == "Lành mạnh" || value == "Tích cực") {
+    if (["Có cao HA", "Thiếu rau", "Ít vận động", "Cần chú ý"].contains(value)) {
+      valueColor = Colors.orange.shade900;
+    } else if (["Lành mạnh", "Tích cực", "Tuyệt vời", "Rất tốt"].contains(value)) {
       valueColor = Colors.green.shade700;
     }
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-      padding: const EdgeInsets.all(8),
+      margin: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 10.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+            spreadRadius: 1,
           ),
         ],
       ),
-      alignment: Alignment.center, 
-      child: FittedBox(
-        fit: BoxFit.scaleDown, 
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              iconPath,
-              width: 34, 
-              height: 34,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.info, size: 34, color: Colors.grey),
-            ),
-            
-            const SizedBox(height: 8),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            iconPath,
+            width: 36,
+            height: 36,
+            fit: BoxFit.contain,
+            cacheWidth: 100,
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.info, size: 36, color: Colors.grey),
+          ),
+          
+          const Spacer(),
 
-            Text(
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
               value,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.w800,
                 color: valueColor,
+                height: 1.2,
               ),
             ),
+          ),
 
-            if (unit != null) ...[
-              const SizedBox(height: 2),
-              Text(
-                unit!,
-                style: const TextStyle(fontSize: 10, color: Colors.grey),
-              ),
-            ],
-
-            const SizedBox(height: 4),
-
+          if (unit != null) ...[
+            const SizedBox(height: 2),
             Text(
-              label,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF007BFF),
-              ),
+              unit!,
+              style: TextStyle(fontSize: 10, color: Colors.grey[600], fontWeight: FontWeight.w500),
             ),
           ],
-        ),
+
+          const Spacer(),
+
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF007BFF),
+            ),
+          ),
+        ],
       ),
     );
   }

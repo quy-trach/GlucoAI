@@ -25,6 +25,8 @@ dependencies:
   intl: ^0.20.2
   fl_chart: ^1.1.1
   animated_text_kit: ^4.3.0
+  geolocator: ^13.0.0  # Để lấy GPS
+  url_launcher: ^6.3.0 # Để mở bản đồ chỉ đường
 
 #  Các thư viện khác có thể được thêm vào đây
 dev_dependencies:

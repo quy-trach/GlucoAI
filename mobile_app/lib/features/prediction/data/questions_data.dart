@@ -39,8 +39,6 @@ final List<Question> surveyQuestions = [
     options: [
       Option("Nam giới", {"Sex": 1.0}),
       Option("Nữ giới", {"Sex": 0.0}),
-      Option("Khác (Cơ thể thiên về Nam)", {"Sex": 1.0}),
-      Option("Khác (Cơ thể thiên về Nữ)", {"Sex": 0.0}),
     ],
   ),
 
@@ -50,7 +48,7 @@ final List<Question> surveyQuestions = [
     type: QuestionType.singleChoice,
     icon: "cake",
     options: [
-      Option("Thanh niên (Dưới 30 tuổi)", {"Age": 2.0}), // Map tương ứng scale 1-13
+      Option("Thanh niên (Dưới 30 tuổi)", {"Age": 2.0}), 
       Option("Trung niên (30 - 45 tuổi)", {"Age": 5.0}),
       Option("Đứng tuổi (46 - 60 tuổi)", {"Age": 8.0}),
       Option("Cao tuổi (Trên 60 tuổi)", {"Age": 11.0}),
@@ -106,26 +104,26 @@ final List<Question> surveyQuestions = [
 
   Question(
     id: "Stroke",
-    text: "{xung_ho} đã từng bị đột quỵ chưa?",
+    text: "{xung_ho} đã từng có tiền sử bị Đột quỵ (Tai biến) chưa?",
     type: QuestionType.singleChoice,
     icon: "brain",
     options: [
       Option("Chưa bao giờ", {"Stroke": 0.0}),
       Option("Có dấu hiệu nhẹ (Thoáng qua)", {"Stroke": 0.0}),
       Option("Đã từng bị và đã hồi phục", {"Stroke": 1.0}),
-      Option("Đã bị nhiều lần", {"Stroke": 1.0}),
+      // Option("Đã bị nhiều lần", {"Stroke": 1.0}),
     ],
   ),
 
   Question(
     id: "HeartDiseaseorAttack",
-    text: "Tiền sử bệnh tim mạch hoặc nhồi máu cơ tim?",
+    text: "{xung_ho} đã từng được chẩn đoán mắc bệnh tim mạch hoặc nhồi máu cơ tim chưa?",
     type: QuestionType.singleChoice,
     icon: "heart",
     options: [
       Option("Tim mạch khỏe mạnh", {"HeartDiseaseorAttack": 0.0}),
       Option("Hay bị đau thắt ngực", {"HeartDiseaseorAttack": 0.0}),
-      Option("Có bệnh lý mạch vành", {"HeartDiseaseorAttack": 1.0}),
+      Option("Có bệnh lý tim mạch vành", {"HeartDiseaseorAttack": 1.0}),
       Option("Đã từng bị nhồi máu cơ tim", {"HeartDiseaseorAttack": 1.0}),
     ],
   ),
@@ -133,7 +131,7 @@ final List<Question> surveyQuestions = [
   // --- NHÓM 3: LỐI SỐNG (LIFESTYLE) ---
   Question(
     id: "Smoker",
-    text: "Thói quen hút thuốc lá của {xung_ho}?",
+    text: "{xung_ho} có thói quen hút thuốc lá không?",
     type: QuestionType.singleChoice,
     icon: "smoking",
     options: [
@@ -146,7 +144,7 @@ final List<Question> surveyQuestions = [
 
   Question(
     id: "PhysActivity",
-    text: "Mức độ vận động thể chất hàng tuần?",
+    text: "Trong 30 ngày qua, {xung_ho} có tập thể dục hoặc vận động mạnh không?",
     type: QuestionType.singleChoice,
     icon: "fitness",
     options: [
@@ -159,7 +157,7 @@ final List<Question> surveyQuestions = [
 
   Question(
     id: "Fruits",
-    text: "{xung_ho} có ăn trái cây thường xuyên không?",
+    text: "{xung_ho} có thói quen ăn trái cây hàng ngày không?",
     type: QuestionType.singleChoice,
     icon: "apple",
     options: [
@@ -172,7 +170,7 @@ final List<Question> surveyQuestions = [
 
   Question(
     id: "Veggies",
-    text: "Thói quen ăn rau xanh hàng ngày?",
+    text: "{xung_ho} có thói quen ăn rau xanh hàng ngày không?",
     type: QuestionType.singleChoice,
     icon: "leaf",
     options: [
@@ -199,7 +197,7 @@ final List<Question> surveyQuestions = [
   // --- NHÓM 4: SỨC KHỎE TỔNG QUÁT ---
   Question(
     id: "GenHlth",
-    text: "Tự đánh giá sức khỏe tổng quát hiện tại?",
+    text: "Tự đánh giá tình trạng sức khỏe tổng quát của {xung_ho}?",
     type: QuestionType.singleChoice,
     icon: "health_card",
     options: [
@@ -212,7 +210,7 @@ final List<Question> surveyQuestions = [
 
   Question(
     id: "MentHlth",
-    text: "Trong 30 ngày qua, số ngày sức khỏe tâm thần kém?",
+    text: "Trong 30 ngày qua, bao nhiêu ngày {xung_ho} thấy căng thẳng, áp lực (Stress)?",
     type: QuestionType.singleChoice,
     icon: "mental",
     options: [
@@ -225,7 +223,7 @@ final List<Question> surveyQuestions = [
 
   Question(
     id: "PhysHlth",
-    text: "Trong 30 ngày qua, số ngày sức khỏe thể chất kém?",
+    text: "Trong 30 ngày qua, bao nhiêu ngày {xung_ho} cảm thấy mệt mỏi hoặc đau ốm?",
     type: QuestionType.singleChoice,
     icon: "body",
     options: [
