@@ -17,7 +17,6 @@ class HomeSliverHeader extends StatelessWidget {
 
 class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
   static const String _logoPath = 'assets/images/logo_glucoAI.png';
-  static const String _bgDecoPath = 'assets/images/GlucoAI_Doctor.png';
   static const Color _primaryColor = Color(0xFF007BFF);
 
   @override
@@ -68,11 +67,7 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
                             height: 32,
                             fit: BoxFit.contain,
                           ),
-                          Image.asset(
-                            _bgDecoPath,
-                            height: 32,
-                            fit: BoxFit.contain,
-                          ),
+                     
                         ],
                       ),
 

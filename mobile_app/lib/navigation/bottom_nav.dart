@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // 1. Import Firebase Auth
-import '../../services/auth_service.dart'; // 2. Import Auth Service của bạn
+import 'package:firebase_auth/firebase_auth.dart';
 
+// Import các trang
 import '../features/home/presentation/pages/home_page.dart';
 import '../features/account/presentation/pages/account_page.dart';
 import '../features/history/presentation/pages/history_page.dart';
+
+// Import Widgets helper
+import '../../core/widgets/login_request_dialog.dart';
+import '../../core/widgets/fade_indexed_stack.dart';
 
 class BottomNav extends StatefulWidget {
   const BottomNav({super.key});
@@ -16,9 +20,6 @@ class BottomNav extends StatefulWidget {
 
 class _BottomNavState extends State<BottomNav> {
   int _currentIndex = 0;
-  late PageController _pageController;
-
-  final List<Widget> _pages = const [HomePage(), HistoryPage(), AccountPage()];
 
   final List<Map<String, dynamic>> _navItems = [
     {'icon': CupertinoIcons.house_fill, 'label': 'Trang chủ'},
@@ -26,122 +27,23 @@ class _BottomNavState extends State<BottomNav> {
     {'icon': CupertinoIcons.person_fill, 'label': 'Tài khoản'},
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(initialPage: _currentIndex);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  // --- HÀM HIỂN THỊ POPUP ĐĂNG NHẬP ---
-  void _showLoginDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Center(
-            child: Text(
-              "Thông báo",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Bạn cần đăng nhập để truy cập vào Tài khoản cá nhân.",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.black54),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    // 1. Đóng popup hiện tại
-                    Navigator.of(context).pop();
-                    
-                    // 2. Gọi hàm đăng nhập
-                    User? user = await AuthService().signInWithGoogle();
-
-                    // 3. Nếu thành công -> Chuyển sang tab Tài khoản
-                    if (user != null && mounted) {
-                      setState(() {
-                        _currentIndex = 2; // Index của tab Tài khoản
-                      });
-                      _pageController.jumpToPage(2);
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Xin chào ${user.displayName}!")),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black87,
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      side: const BorderSide(color: Colors.grey, width: 0.5),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Icon Google
-                      Image.network(
-                        'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
-                        height: 24,
-                        width: 24,
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        "Đăng nhập bằng Google",
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // --- XỬ LÝ KHI BẤM NÚT NAV ---
   void _onItemTapped(int index) {
-    // Logic chặn truy cập tab Tài khoản (Index = 2)
     if (index == 2) {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        // Chưa đăng nhập -> Hiện Popup và Dừng lại
-        _showLoginDialog();
-        return; 
+        showDialog(
+          context: context,
+          builder: (context) => LoginRequestDialog(
+            onSuccess: () {
+              setState(() {
+                _currentIndex = 2;
+              });
+            },
+          ),
+        );
+        return;
       }
     }
-
-    // Nếu không bị chặn thì chạy bình thường
-    setState(() {
-      _currentIndex = index;
-    });
-    
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOutQuad,
-    );
-  }
-
-  void _onPageChanged(int index) {
     setState(() {
       _currentIndex = index;
     });
@@ -149,79 +51,121 @@ class _BottomNavState extends State<BottomNav> {
 
   @override
   Widget build(BuildContext context) {
-    const Color activeColor = Color(0xFF007BFF);
+    // 🔥 QUAN TRỌNG NHẤT: Lắng nghe sự thay đổi của User tại đây
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        // Lấy thông tin user (có thể là null nếu chưa đăng nhập)
+        final user = snapshot.data;
+        
+        // Tạo Key dựa trên UID. 
+        // Nếu User đổi -> UID đổi -> Key đổi -> Trang được vẽ lại từ đầu
+        final String uidKey = user?.uid ?? 'guest';
 
-    return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: _onPageChanged,
-        // QUAN TRỌNG: Tắt vuốt tay để bắt buộc dùng nav bar
-        // (Tránh trường hợp vuốt từ Lịch sử sang Tài khoản để né login)
-        physics: const NeverScrollableScrollPhysics(), 
-        children: _pages,
-      ),
+        final List<Widget> pages = [
+          // 🔥 Gắn Key vào HomePage
+          HomePage(key: ValueKey('home_$uidKey')), 
+          
+          // 🔥 Gắn Key vào HistoryPage
+          HistoryPage(key: ValueKey('history_$uidKey')), 
+          
+          // AccountPage thì không cần key đặc biệt vì nó tự có StreamBuilder bên trong rồi
+          const AccountPage(),
+        ];
 
-      bottomNavigationBar: Container(
-        height: 65 + MediaQuery.of(context).padding.bottom,
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).padding.bottom,
-          top: 8,
-        ),
-        decoration: const BoxDecoration(
-          color: Color(0xFF007BFF),
-          boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(_navItems.length, (index) {
-            return _buildFloatingPillItem(
-              index: index,
-              icon: _navItems[index]['icon'] as IconData,
-              label: _navItems[index]['label'] as String,
-              activeColor: activeColor,
-            );
-          }),
-        ),
-      ),
+        return Scaffold(
+          extendBody: false,
+          
+          body: FadeIndexedStack(
+            index: _currentIndex,
+            children: pages,
+          ),
+
+          // --- NAV XANH FULL WIDTH (Giữ nguyên giao diện bạn thích) ---
+          bottomNavigationBar: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF007BFF), 
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF007BFF).withValues(alpha: 0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, -5),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                height: 65,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: List.generate(_navItems.length, (index) {
+                    return _buildBlueStyleItem(
+                      index: index,
+                      icon: _navItems[index]['icon'],
+                      label: _navItems[index]['label'],
+                      isSelected: index == _currentIndex,
+                    );
+                  }),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildFloatingPillItem({
+  Widget _buildBlueStyleItem({
     required int index,
     required IconData icon,
     required String label,
-    required Color activeColor,
+    required bool isSelected,
   }) {
-    final bool isSelected = index == _currentIndex;
+    const Color activeContentColor = Colors.white;
+    final Color inactiveContentColor = Colors.white.withValues(alpha: 0.6);
 
-    return GestureDetector(
+    return InkWell(
       onTap: () => _onItemTapped(index),
-      child: Container(
-        color: Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
+      borderRadius: BorderRadius.circular(16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutQuint,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white.withValues(alpha: 0.2) : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
           children: [
-            AnimatedOpacity(
-              duration: const Duration(milliseconds: 200),
-              opacity: isSelected ? 1.0 : 0.6,
-              child: Icon(
-                icon,
-                size: 28,
-                color: Colors.white,
-              ),
+            Icon(
+              icon,
+              size: 26,
+              color: isSelected ? activeContentColor : inactiveContentColor,
             ),
-            const SizedBox(height: 4),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.8),
-                fontFamily: 'Roboto',
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: SizedBox(
+                width: isSelected ? null : 0,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                      color: activeContentColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.clip,
+                  ),
+                ),
               ),
-              child: Text(label),
             ),
           ],
         ),

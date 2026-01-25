@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-// Nhớ import file vừa tạo ở trên (sửa đường dẫn nếu cần)
-import '../../utils/advice_helper.dart'; 
+// --- IMPORTS LOGIC ---
+import '../../../../core/models/medical_center_model.dart';
+import '../../../../core/services/location_service.dart';
+import '../../../../core/widgets/medical_card.dart';
+import '../../utils/advice_helper.dart';
 
 class ResultPage extends StatefulWidget {
   final Map<String, dynamic> resultData;
@@ -19,16 +22,19 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
   double riskPercent = 0.0;
   double safePercent = 0.0;
   double bmiValue = 0.0;
-  
-  // Các biến này sẽ lấy từ AdviceHelper
   String label = "";
   String advice = "";
   Color themeColor = Colors.green;
 
+  // Dữ liệu bệnh viện
+  List<MedicalCenterModel> _medicalCenters = [];
+  bool _isLoadingMedical = true;
+
   @override
   void initState() {
     super.initState();
-    _parseData(); // <-- Hàm này giờ sẽ gọi AdviceHelper
+    _parseData();
+    _fetchMedicalCenters();
 
     _controller = AnimationController(
       vsync: this,
@@ -44,108 +50,120 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  // --- ĐÂY LÀ PHẦN SỬA ĐỔI CHÍNH ---
   void _parseData() {
     final data = widget.resultData;
-
-    // 1. Lấy dữ liệu số
     riskPercent = (data['prob_risk'] as num?)?.toDouble() ?? 0.0;
     safePercent = (data['prob_safe'] as num?)?.toDouble() ?? (1.0 - riskPercent);
     bmiValue = (data['bmi'] as num?)?.toDouble() ?? (data['BMI'] as num?)?.toDouble() ?? 0.0;
     int prediction = (data['prediction'] as num?)?.toInt() ?? 0;
 
-    // 2. Gọi Helper để lấy lời khuyên chi tiết
-    // Truyền kết quả dự đoán và BMI vào để lấy lời khuyên phù hợp
     final adviceData = AdviceHelper.getAdvice(prediction, bmiValue);
-
-    // 3. Gán dữ liệu vào biến giao diện
     label = adviceData['label'];
     themeColor = adviceData['color'];
     advice = adviceData['content'];
   }
-  // ----------------------------------
+
+  Future<void> _fetchMedicalCenters() async {
+    final centers = await LocationService().getNearbyHospitals();
+    if (mounted) {
+      setState(() {
+        _medicalCenters = centers;
+        _isLoadingMedical = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // ... (Phần UI bên dưới GIỮ NGUYÊN KHÔNG ĐỔI) ...
-    // Copy lại toàn bộ phần build() và các widget con từ code trước
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text("KẾT QUẢ PHÂN TÍCH"),
         centerTitle: true,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
-        titleTextStyle: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+        titleTextStyle: const TextStyle(
+          color: Colors.black, 
+          fontWeight: FontWeight.bold, 
+          fontSize: 16
+        ),
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.black),
           onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // TIÊU ĐỀ
+            // 1. HEADER LABEL
             Text(
               label,
               style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w800, 
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
                 color: themeColor,
-                letterSpacing: 1.0,
+                letterSpacing: 0.5,
               ),
             ),
             const SizedBox(height: 24),
 
-            // HAI THẺ KÍNH
+            // 2. HAI VÒNG TRÒN (Giữ nguyên tối giản)
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildGlassPercentCard("AN TOÀN", safePercent, Colors.green),
-                const SizedBox(width: 16),
-                _buildGlassPercentCard("NGUY CƠ", riskPercent, Colors.red),
+                _buildMinimalCircle("An toàn", safePercent, Colors.green),
+                Container(width: 1, height: 50, color: Colors.grey[200]),
+                _buildMinimalCircle("Nguy cơ", riskPercent, Colors.red),
               ],
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 30),
 
-            // BMI
-            if (bmiValue > 0) ...[
-              _buildBMICard(),
-              const SizedBox(height: 24),
-            ],
+            // 3. BMI CARD (Tách biệt, có border nhẹ)
+            if (bmiValue > 0) 
+              _buildSeparateBMICard(),
 
-            // LỜI KHUYÊN (Đã chi tiết hơn nhờ Helper)
+            const SizedBox(height: 20),
+
+            // 4. LỜI KHUYÊN (Border nhẹ, chữ đậm)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: themeColor.withValues(alpha: 0.08), 
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: themeColor.withValues(alpha: 0.2)),
+                color: Colors.white,
+                // Viền nhẹ bao quanh
+                border: Border.all(color: Colors.grey.shade300), 
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.tips_and_updates, color: themeColor, size: 24),
-                      const SizedBox(width: 8),
+                      Icon(Icons.lightbulb_circle, color: themeColor, size: 24),
+                      const SizedBox(width: 10),
                       Text(
-                        "LỜI KHUYÊN CHUYÊN GIA", // Đổi tiêu đề cho ngầu
+                        "LỜI KHUYÊN DÀNH CHO BẠN",
                         style: TextStyle(
-                          fontSize: 16, 
+                          fontSize: 14, 
                           fontWeight: FontWeight.bold, 
-                          color: themeColor
+                          color: themeColor // Màu tiêu đề theo mức độ nguy cơ
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
+                  // Nội dung chữ đậm màu hơn (black87)
                   Text(
                     advice,
-                    style: const TextStyle(fontSize: 15, height: 1.6, color: Colors.black87),
+                    style: const TextStyle(
+                      fontSize: 15, 
+                      height: 1.6, 
+                      color: Colors.black87, // Đen rõ ràng, không mờ
+                      fontWeight: FontWeight.w400
+                    ),
                     textAlign: TextAlign.justify,
                   ),
                 ],
@@ -153,179 +171,207 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
             ),
 
             const SizedBox(height: 30),
+            const Divider(color: Color(0xFFF0F0F0), thickness: 1),
+            const SizedBox(height: 20),
 
-            // NÚT HOME
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: themeColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 2,
-                ),
-                child: const Text(
-                  "VỀ TRANG CHỦ",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ... (Giữ nguyên các hàm _buildGlassPercentCard và _buildBMICard cũ) ...
-  // --- WIDGET 1: THẺ KÍNH HIỂN THỊ % ---
-  Widget _buildGlassPercentCard(String title, double percent, Color color) {
-    return Expanded(
-      child: Container(
-        height: 160,
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: color.withValues(alpha: 0.2), 
-            width: 1.5
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            )
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedBuilder(
-              animation: _animation,
-              builder: (context, child) {
-                return Stack(
-                  alignment: Alignment.center,
+            // 5. DANH SÁCH BỆNH VIỆN
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
                   children: [
-                    SizedBox(
-                      width: 80,
-                      height: 80,
-                      child: CircularProgressIndicator(
-                        value: percent * _animation.value,
-                        strokeWidth: 8,
-                        backgroundColor: Colors.grey[200],
-                        color: color,
-                        strokeCap: StrokeCap.round,
-                      ),
-                    ),
-                    Text(
-                      "${(percent * _animation.value * 100).toInt()}%",
-                      style: TextStyle(
-                        fontSize: 18, 
-                        fontWeight: FontWeight.bold, 
-                        color: color
-                      ),
+                    const Icon(Icons.location_on, color: Colors.blue, size: 20),
+                    const SizedBox(width: 8),
+                    const Text(
+                      "Cơ sở y tế lân cận",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ],
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14, 
-                fontWeight: FontWeight.w600, 
-                color: Colors.grey[700]
+                ),
               ),
             ),
+
+            if (_isLoadingMedical)
+              const Center(child: Padding(
+                padding: EdgeInsets.all(20),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.blue
+                  ),
+              ))
+            else if (_medicalCenters.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    Icon(Icons.map_outlined, color: Colors.grey[400], size: 30),
+                    const SizedBox(height: 8),
+                    const Text("Không tìm thấy cơ sở y tế.", style: TextStyle(color: Colors.grey)),
+                    TextButton(onPressed: _fetchMedicalCenters, child: const Text("Thử lại"))
+                  ],
+                ),
+              )
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _medicalCenters.length,
+                itemBuilder: (context, index) {
+                  return MedicalCenterCard(
+                    center: _medicalCenters[index],
+                    isCompact: false,
+                  );
+                },
+              ),
+              
+            const SizedBox(height: 30),
+             // Nút Quay về
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton(
+                onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.black87,
+                  side: BorderSide(color: Colors.grey.shade300),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text("Quay về Trang chủ", style: TextStyle(fontWeight: FontWeight.w600)),
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  // --- WIDGET 2: THẺ BMI ---
-  Widget _buildBMICard() {
-    String bmiStatus = "Bình thường";
-    Color bmiColor = Colors.green;
-    
+  // --- WIDGET VÒNG TRÒN (Giữ nguyên) ---
+  Widget _buildMinimalCircle(String title, double percent, Color color) {
+    return Column(
+      children: [
+        AnimatedBuilder(
+          animation: _animation,
+          builder: (context, child) {
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: CircularProgressIndicator(
+                    value: percent * _animation.value,
+                    strokeWidth: 6,
+                    backgroundColor: Colors.grey[100],
+                    color: color,
+                    strokeCap: StrokeCap.round,
+                  ),
+                ),
+                Text(
+                  "${(percent * _animation.value * 100).toInt()}%",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 8),
+        Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black54)),
+      ],
+    );
+  }
+
+  // --- WIDGET BMI RIÊNG BIỆT (ĐÃ SỬA DÙNG ẢNH) ---
+  Widget _buildSeparateBMICard() {
+    String status = "";
+    Color color = Colors.grey;
+
     if (bmiValue < 18.5) {
-      bmiStatus = "Thiếu cân";
-      bmiColor = Colors.orange;
-    } else if (bmiValue >= 25 && bmiValue < 30) {
-      bmiStatus = "Thừa cân";
-      bmiColor = Colors.orange;
-    } else if (bmiValue >= 30) {
-      bmiStatus = "Béo phì";
-      bmiColor = Colors.red;
+      status = "Thiếu cân";
+      color = Colors.orange;
+    } else if (bmiValue < 25) {
+      status = "Bình thường";
+      color = Colors.green;
+    } else if (bmiValue < 30) {
+      status = "Thừa cân";
+      color = Colors.orange;
+    } else {
+      status = "Béo phì";
+      color = Colors.red;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        // Viền mỏng phân cách
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            width: 50,
+            height: 50,
             decoration: BoxDecoration(
-              color: Colors.blue.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+              color: Colors.blue[50], // Nền nhẹ cho ảnh đỡ trơ
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.monitor_weight, color: Colors.blue),
+            padding: const EdgeInsets.all(8),
+            child: Image.asset(
+              'assets/icon/icon_weight.png', 
+              fit: BoxFit.contain,
+              errorBuilder: (c, o, s) => Icon(Icons.monitor_weight, color: Colors.blue[300]), // Icon dự phòng
+            ),
           ),
+          
           const SizedBox(width: 16),
+          
+          // Thông tin Text
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Chỉ số BMI của bạn",
-                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                const Text(
+                  "Chỉ số BMI",
+                  style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 4),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       bmiValue.toStringAsFixed(1),
-                      style: const TextStyle(
-                        fontSize: 20, 
-                        fontWeight: FontWeight.bold, 
-                        color: Colors.black87
-                      ),
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
+                    // Badge trạng thái nhỏ gọn
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: bmiColor.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(4),
+                        color: color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        bmiStatus,
-                        style: TextStyle(
-                          color: bmiColor, 
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12
-                        ),
+                        status,
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
                       ),
                     )
                   ],
                 ),
               ],
             ),
-          ),
+          )
         ],
       ),
     );

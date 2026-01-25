@@ -53,7 +53,7 @@ class HomeCtaCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "BẮT ĐẦU ĐÁNH GIÁ",
+                        "BẮT ĐẦU KHẢO SÁT",
                         style: TextStyle(
                           color: primaryBlue,
                           fontSize: 20,
