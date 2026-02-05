@@ -27,8 +27,9 @@ Dự án được chia làm hai phần chính:
 ## 🖼 Giao Diện & Minh Họa Hệ Thống
 
 ### 📱 1. Giao diện trang chủ
-<img width="360" height="2400" alt="image" src="https://github.com/user-attachments/assets/c0074e71-858a-4cf0-b877-b0a4678db01b" />
-
+<p align="center">
+<img width="360" alt="image" src="https://github.com/user-attachments/assets/c0074e71-858a-4cf0-b877-b0a4678db01b" />
+</p>
 ---
 
 ### 📊 2. Kết quả dự đoán nguy cơ tiểu đường
