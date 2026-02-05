@@ -24,7 +24,27 @@ Dự án được chia làm hai phần chính:
 * **Deployment**: Hugging Face Spaces (Docker)
 
 ---
+## 🖼 Giao Diện & Minh Họa Hệ Thống
 
+### 📱 1. Giao diện trang chủ
+<img width="1080" height="2400" alt="image" src="https://github.com/user-attachments/assets/c0074e71-858a-4cf0-b877-b0a4678db01b" />
+
+---
+
+### 📊 2. Kết quả dự đoán nguy cơ tiểu đường
+<img width="1080" height="2400" alt="image" src="https://github.com/user-attachments/assets/fd38c242-4b4e-48e8-b5aa-7be7e5a08283" />
+
+---
+
+### 🧠 3. Lịch sử khảo sát
+<img width="1080" height="2400" alt="image" src="https://github.com/user-attachments/assets/ca5dc99b-0714-4b07-9ae6-43873b89614a" />
+
+---
+
+### 🚀 4. Setting
+<img width="1080" height="2400" alt="image" src="https://github.com/user-attachments/assets/10aefb2d-c947-4cbd-a99e-a74b34ebe66f" />
+
+ ---
 ## 📂 Cấu Trúc Thư Mục
 
 ```text
