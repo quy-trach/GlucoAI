@@ -2,6 +2,8 @@
 
 GlucoAI là một ứng dụng di động tích hợp trí tuệ nhân tạo (AI) giúp người dùng dự đoán nguy cơ mắc bệnh tiểu đường dựa trên các chỉ số sức khỏe cá nhân.
 
+<img width="2752" height="1536" alt="glucoai" src="https://github.com/user-attachments/assets/b69668c3-dd6a-4415-a713-46e9ca6dd8e7" />
+
 ## 🚀 Kiến Trúc Dự Án
 
 Dự án được chia làm hai phần chính:
