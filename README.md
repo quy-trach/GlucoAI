@@ -1,4 +1,3 @@
-Bản thảo tiếng Anh dưới đây được tinh chỉnh để phù hợp với tiêu chuẩn của một kho lưu trữ (repository) trên GitHub, sử dụng thuật ngữ chuyên ngành kỹ thuật chính xác và súc tích hơn.
 
 🏥 GlucoAI - Diabetes Risk Prediction System
 GlucoAI is an AI-integrated mobile application designed to help users assess their risk of diabetes based on personal health metrics.
