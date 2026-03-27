@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glucoai/navigation/bottom_nav.dart';
-import '../../../../services/auth_service.dart'; // Giữ nguyên đường dẫn của ông
+import '../../../../services/auth_service.dart'; 
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -185,12 +185,11 @@ class _AccountPageState extends State<AccountPage> {
                             // ẢNH BANNER
                           Container(
                               width: double.infinity,
-                              height: 160, // Ông chỉnh chiều cao tùy ý
+                              height: 160, 
                               margin: const EdgeInsets.only(bottom: 20),
                               // Bo tròn góc container ngoài
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
-                                // Thêm chút bóng mờ nhẹ cho nổi (ko thích thì xóa dòng boxShadow đi)
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withValues(alpha: 0.1),

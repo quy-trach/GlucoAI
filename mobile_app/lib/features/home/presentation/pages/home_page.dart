@@ -27,14 +27,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // --- BIẾN STATE CHO TRUNG TÂM Y TẾ ---
-  // MedicalCenterModel? _nearestCenter;
   List<MedicalCenterModel> _nearestCenters = [];
   bool _isLoadingMedical = true;
 
   @override
   void initState() {
     super.initState();
-    _loadNearestHospital(); // Gọi hàm tải dữ liệu khi mở màn hình
+    _loadNearestHospital(); 
   }
 
   // Hàm gọi Service lấy dữ liệu thật từ OpenStreetMap
@@ -43,7 +42,7 @@ class _HomePageState extends State<HomePage> {
     
     if (mounted) {
       setState(() {
-        // Lấy 2 cái đầu tiên (nếu danh sách đủ dài)
+      
         _nearestCenters = centers.take(2).toList(); 
         _isLoadingMedical = false;
       });
@@ -53,7 +52,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _onRefresh() async {
     setState(() {
       _isLoadingMedical = true;
-      _nearestCenters = []; // Reset danh sách
+      _nearestCenters = []; 
     });
     await _loadNearestHospital();
   }
@@ -61,19 +60,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      
-      // 🔥 1. BỌC RefreshIndicator ĐỂ KÉO XUỐNG RELOAD
+      backgroundColor: const Color(0xFFF5F7FA),  
       body: RefreshIndicator(
-        onRefresh: _onRefresh, // Gọi hàm reload khi kéo
+        onRefresh: _onRefresh,
         color: Colors.blue,
-        
-        child: CustomScrollView(
-          // 🔥 Luôn cho phép cuộn để tính năng kéo-reload hoạt động ngay cả khi list ngắn
-          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-          
+        child: CustomScrollView( 
+          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),         
           slivers: [
-            // --- PHẦN 0: HEADER ---
             const HomeSliverHeader(),
 
             // --- PHẦN 1: BANNER ---
@@ -128,9 +121,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-            // ============================================================
-            // PHẦN MỚI: TRUNG TÂM Y TẾ GẦN NHẤT (CÓ NÚT RETRY)
-            // ============================================================
+            // PHẦN 4: TRUNG TÂM Y TẾ GẦN NHẤT (CÓ NÚT RETRY)
           SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
@@ -166,7 +157,6 @@ class _HomePageState extends State<HomePage> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                       )
-                    // 🟢 LOGIC MỚI: Check danh sách có rỗng không
                     else if (_nearestCenters.isNotEmpty)
                       Column(
                         children: _nearestCenters.map((center) {
@@ -178,7 +168,6 @@ class _HomePageState extends State<HomePage> {
                         }).toList(),
                       )
                     else
-                      // Nút thử lại (Giữ nguyên)
                       InkWell(
                         onTap: _onRefresh,
                         borderRadius: BorderRadius.circular(12),
@@ -223,9 +212,8 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            // ============================================================
 
-            // --- PHẦN 4: CHỈ SỐ SỨC KHỎE ---
+            // --- PHẦN 5: CHỈ SỐ SỨC KHỎE ---
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
@@ -252,7 +240,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-            // --- PHẦN 5: GÓC KIẾN THỨC ---
+            // --- PHẦN 6: GÓC KIẾN THỨC ---
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
@@ -263,7 +251,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-            // --- PHẦN 6: LIST KIẾN THỨC (FIREBASE) ---
+            // --- PHẦN 7: LIST KIẾN THỨC ---
             StreamBuilder<QuerySnapshot>(
               stream: FirestoreService().getKnowledgeStream(),
               builder: (context, snapshot) {

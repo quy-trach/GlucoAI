@@ -25,8 +25,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      // Bạn có thể để SplashScreen trước, 
-      // trong SplashScreen sẽ kiểm tra Auth để chuyển hướng sau
       home: const SplashScreen(), 
     );
   }

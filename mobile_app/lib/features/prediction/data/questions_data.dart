@@ -2,12 +2,11 @@
 
 // 1. CẤU TRÚC DỮ LIỆU (MODEL)
 class Question {
-  final String id;        // ID định danh (HighBP, BMI...)
-  final String text;      // Nội dung câu hỏi (chứa {xung_ho})
-  final QuestionType type;// Loại câu hỏi
-  final List<Option>? options; // Danh sách đáp án (cho loại trắc nghiệm)
-  final String? icon;     // Tên icon để map ra giao diện
-
+  final String id;      
+  final String text;      
+  final QuestionType type;
+  final List<Option>? options; 
+  final String? icon;     
   Question({
     required this.id,
     required this.text,
@@ -20,8 +19,8 @@ class Question {
 enum QuestionType { yesNo, scale, inputBmi, inputDays, singleChoice }
 
 class Option {
-  final String text;      // Chữ hiển thị (VD: "Nhân viên văn phòng...")
-  final Map<String, double> values; // Giá trị map vào model (Có thể map nhiều biến 1 lúc)
+  final String text;      
+  final Map<String, double> values;
 
   Option(this.text, this.values);
 }
@@ -70,7 +69,7 @@ final List<Question> surveyQuestions = [
     icon: "blood_pressure",
     options: [
       Option("Ổn định / Bình thường", {"HighBP": 0.0}),
-      Option("Hơi cao (Tiền cao huyết áp)", {"HighBP": 0.0}), // Vẫn chưa tính là HighBP theo dataset
+      Option("Hơi cao (Tiền cao huyết áp)", {"HighBP": 0.0}), 
       Option("Cao (Đang dùng thuốc kiểm soát)", {"HighBP": 1.0}),
       Option("Rất cao / Thường xuyên mất kiểm soát", {"HighBP": 1.0}),
     ],
@@ -111,7 +110,6 @@ final List<Question> surveyQuestions = [
       Option("Chưa bao giờ", {"Stroke": 0.0}),
       Option("Có dấu hiệu nhẹ (Thoáng qua)", {"Stroke": 0.0}),
       Option("Đã từng bị và đã hồi phục", {"Stroke": 1.0}),
-      // Option("Đã bị nhiều lần", {"Stroke": 1.0}),
     ],
   ),
 
