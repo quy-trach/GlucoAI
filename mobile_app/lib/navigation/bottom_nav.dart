@@ -51,25 +51,16 @@ class _BottomNavState extends State<BottomNav> {
 
   @override
   Widget build(BuildContext context) {
-    // 🔥 QUAN TRỌNG NHẤT: Lắng nghe sự thay đổi của User tại đây
+    //Lắng nghe sự thay đổi của User tại đây
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // Lấy thông tin user (có thể là null nếu chưa đăng nhập)
         final user = snapshot.data;
-        
-        // Tạo Key dựa trên UID. 
-        // Nếu User đổi -> UID đổi -> Key đổi -> Trang được vẽ lại từ đầu
         final String uidKey = user?.uid ?? 'guest';
 
         final List<Widget> pages = [
-          // 🔥 Gắn Key vào HomePage
           HomePage(key: ValueKey('home_$uidKey')), 
-          
-          // 🔥 Gắn Key vào HistoryPage
           HistoryPage(key: ValueKey('history_$uidKey')), 
-          
-          // AccountPage thì không cần key đặc biệt vì nó tự có StreamBuilder bên trong rồi
           const AccountPage(),
         ];
 
@@ -81,7 +72,7 @@ class _BottomNavState extends State<BottomNav> {
             children: pages,
           ),
 
-          // --- NAV XANH FULL WIDTH (Giữ nguyên giao diện bạn thích) ---
+          // --- NAV XANH FULL WIDTH---
           bottomNavigationBar: Container(
             decoration: BoxDecoration(
               color: const Color(0xFF007BFF), 

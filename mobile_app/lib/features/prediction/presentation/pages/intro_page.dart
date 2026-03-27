@@ -123,7 +123,6 @@ class _IntroPageState extends State<IntroPage> {
                     "Chào mừng đến với\nGlucoAI",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.quicksand(
-                      // <--- Đổi font ở đây
                       fontSize: 32,
                       fontWeight: FontWeight
                           .w900, 
@@ -134,7 +133,7 @@ class _IntroPageState extends State<IntroPage> {
 
                   const SizedBox(height: 10),
 
-                  // 3. CÂU DẪN (Giữ nguyên câu mới)
+                  // 3. CÂU DẪN 
                   const Text(
                     '"Hãy nhập năm sinh để GlucoAI\nthấu hiểu sức khỏe của bạn."',
                     textAlign: TextAlign.center,

@@ -83,7 +83,7 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 🔥 QUAN TRỌNG: Lấy user hiện tại ở đây để kiểm tra Auth
+    //Lấy user hiện tại ở đây để kiểm tra Auth
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
@@ -99,7 +99,7 @@ class _HistoryPageState extends State<HistoryPage> {
           fontSize: 18
         ),
       ),
-      // 🔥 Kiểm tra nếu user null thì hiện màn hình yêu cầu đăng nhập
+      //  Kiểm tra nếu user null thì hiện màn hình yêu cầu đăng nhập
       body: user == null 
       ? Center(
           child: Column(
