@@ -11,7 +11,7 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   late final WebViewController _controller;
-  bool _isLoading = true; // Biến để hiện vòng xoay khi đang tải
+  bool _isLoading = true; 
 
   @override
   void initState() {
@@ -22,24 +22,27 @@ class _ChatPageState extends State<ChatPage> {
     final String userName = user?.displayName ?? 'Khách Demo';
     final String userEmail = user?.email ?? 'demo@glucoai.com';
 
-    // 2. Link Tawk.to của bạn (Đã lấy từ mã bạn gửi)
+    // 2. Link Tawk.to của bạn 
     const String tawkBaseUrl = 'https://tawk.to/chat/6948227bf105e0197a371eaa/1jd0sdd0q';
     
-    // 3. Tạo URL có kèm thông tin User (Để bên Tawk.to biết ai đang chat)
+    // 3. Tạo URL có kèm thông tin User 
     // Cú pháp: url?name=TEN&email=EMAIL
     final String fullUrl = '$tawkBaseUrl?name=${Uri.encodeComponent(userName)}&email=${Uri.encodeComponent(userEmail)}';
 
     // 4. Cấu hình WebView
     _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted) // Bắt buộc để Tawk.to chạy
+      ..setJavaScriptMode(JavaScriptMode.unrestricted) 
       ..setBackgroundColor(Colors.white)
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (String url) {
-            // Bắt đầu tải
+            if (mounted) {
+              setState(() {
+                _isLoading = true; 
+              });
+            }
           },
           onPageFinished: (String url) {
-            // Tải xong -> Tắt vòng xoay loading
             if (mounted) {
               setState(() {
                 _isLoading = false;
@@ -62,7 +65,6 @@ class _ChatPageState extends State<ChatPage> {
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 1,
-        // Chỉnh màu nút Back và Tiêu đề
         iconTheme: const IconThemeData(color: Colors.black), 
         titleTextStyle: const TextStyle(
           color: Colors.black, 
@@ -72,7 +74,6 @@ class _ChatPageState extends State<ChatPage> {
       ),
       body: Stack(
         children: [
-          // Widget hiển thị trang Chat
           WebViewWidget(controller: _controller),
 
           // Hiển thị vòng loading khi trang chưa tải xong

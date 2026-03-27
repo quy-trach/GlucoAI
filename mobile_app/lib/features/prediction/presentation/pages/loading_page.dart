@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../../../core/services/api_service.dart';
+import '../../../../core/services/firestore_service.dart';
 import 'result_page.dart'; 
 
 class LoadingPage extends StatefulWidget {
@@ -22,7 +23,7 @@ class _LoadingPageState extends State<LoadingPage> {
   }
 
   void _processData() async {
-    // 1. Giả lập độ trễ 3 giây để người dùng thấy hiệu ứng "đang tính toán"
+    // 1. Giả lập độ trễ 3 giây
     final minWaitTime = Future.delayed(const Duration(seconds: 3));
 
     try {
@@ -38,19 +39,23 @@ class _LoadingPageState extends State<LoadingPage> {
       if (!mounted) return;
 
       // ============================================================
-      // 🔥 BƯỚC QUAN TRỌNG: GỘP BMI VÀO KẾT QUẢ 🔥
+      // GỘP BMI VÀO KẾT QUẢ
       // ============================================================
       
-      // Tạo một bản sao của kết quả API (để có thể chỉnh sửa)
       Map<String, dynamic> finalData = Map.from(apiResult);
-
-      // Lấy chỉ số BMI từ dữ liệu đầu vào (đã tính ở SurveyPage) nhét vào
-      // Nếu không tìm thấy thì mặc định là 0.0
       finalData['bmi'] = widget.answers['BMI'] ?? 0.0;
 
       // ============================================================
+      // 🔥 [MỚI THÊM] LƯU LỊCH SỬ LÊN FIREBASE TẠI ĐÂY 🔥
+      // ============================================================
+      // Không cần await để người dùng không phải đợi thêm
+      FirestoreService().saveSurveyResult(
+        inputs: widget.answers, 
+        result: finalData
+      );
+      // ============================================================
 
-      // 4. Chuyển sang trang Kết quả với dữ liệu ĐẦY ĐỦ (API + BMI)
+      // 4. Chuyển sang trang Kết quả
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -60,14 +65,13 @@ class _LoadingPageState extends State<LoadingPage> {
 
     } catch (e) {
       if (!mounted) return;
-      // Quay về trang trước nếu lỗi
       Navigator.pop(context); 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Lỗi kết nối: $e"), backgroundColor: Colors.red),
       );
     }
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -2,55 +2,101 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 class HomeHealthStats extends StatelessWidget {
-  const HomeHealthStats({super.key});
+  final Map<String, dynamic>? data;
 
-  @override
-  Widget build(BuildContext context) {
-    // Dữ liệu (Giữ nguyên)
-    final List<Map<String, String?>> statsData = [
+  const HomeHealthStats({super.key, this.data});
+
+  // --- TÁCH LOGIC XỬ LÝ DỮ LIỆU RA HÀM RIÊNG ---
+  List<Map<String, String?>> _processData() {
+    final inputs = data?['input_data'] ?? {};
+    final bmiVal = data?['bmi'] ?? 0.0;
+
+    // 1. Vận động
+    String physStatus = "Chưa rõ";
+    if (inputs['PhysActivity'] != null) {
+      physStatus = (inputs['PhysActivity'] == 1) ? "Tích cực" : "Ít vận động";
+    }
+
+    // 2. Ăn uống
+    String dietStatus = "Chưa rõ";
+    if (inputs['Veggies'] != null && inputs['Fruits'] != null) {
+      bool hasVeggies = inputs['Veggies'] == 1;
+      bool hasFruits = inputs['Fruits'] == 1;
+      
+      if (hasVeggies && hasFruits) {
+        dietStatus = "Lành mạnh";
+      } else if (hasVeggies || hasFruits) {
+        dietStatus = "Khá tốt";
+      } else {
+        dietStatus = "Thiếu rau";
+      }
+    }
+
+    // 3. Sức khỏe chung
+    String healthGen = "---";
+    if (inputs['GenHlth'] != null) {
+      int gen = (inputs['GenHlth'] as num).toInt();
+      // 🔥 ĐÃ SỬA: Thêm ngoặc nhọn {} cho các dòng if/else
+      if (gen <= 1) {
+        healthGen = "Tuyệt vời";
+      } else if (gen <= 2) {
+        healthGen = "Rất tốt";
+      } else if (gen <= 3) {
+        healthGen = "Bình thường";
+      } else {
+        healthGen = "Cần chú ý";
+      }
+    }
+
+    return [
       {
-        "label": "BMI",
-        "value": "23.1",
+        "label": "Chỉ số BMI",
+        "value": (bmiVal > 0) ? bmiVal.toStringAsFixed(1) : "--",
         "unit": "kg/m²",
         "icon": "assets/icon/icon_bmi.png"
       },
       {
-        "label": "Vòng bụng",
-        "value": "85",
-        "unit": "cm",
-        "icon": "assets/icon/icon_waist.png"
-      },
-      {
-        "label": "Cân nặng",
-        "value": "70",
-        "unit": "kg",
-        "icon": "assets/icon/icon_weight.png"
-      },
-      {
-        "label": "Huyết áp",
-        "value": "120/80",
-        "unit": "mmHg",
+        "label": "Tiền sử HA",
+        "value": (inputs['HighBP'] == 1) ? "Có cao HA" : "Bình thường",
+        "unit": "Tình trạng",
         "icon": "assets/icon/icon_blood_pressure.png"
       },
       {
         "label": "Vận động",
-        "value": "30",
-        "unit": "phút/ngày",
+        "value": physStatus,
+        "unit": "Thói quen",
         "icon": "assets/icon/icon_run.png"
       },
+      {
+        "label": "Chế độ ăn",
+        "value": dietStatus,
+        "unit": "Dinh dưỡng",
+        "icon": "assets/icon/icon_nutrition.png"
+      },
+      {
+        "label": "Sức khỏe chung",
+        "value": healthGen,
+        "unit": "Tự đánh giá",
+        "icon": "assets/icon/medical _summary.png"
+      },
     ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Map<String, String?>> statsData = _processData();
 
     return CarouselSlider.builder(
       itemCount: statsData.length,
       options: CarouselOptions(
-        height: 165, // Tăng nhẹ từ 160 lên 165 để an toàn hơn
+        height: 165,
+        enableInfiniteScroll: true,
         enlargeCenterPage: true,
-        enlargeFactor: 0.2, // Giảm từ 0.25 xuống 0.2 để các item bên cạnh đỡ bị bóp méo quá nhiều
-        viewportFraction: 0.38, // Tăng nhẹ để thẻ to hơn chút
-        enableInfiniteScroll: false,
-        initialPage: 1,
+        enlargeFactor: 0.25,
+        viewportFraction: 0.4,
+        initialPage: 0,
         scrollPhysics: const BouncingScrollPhysics(),
-        padEnds: true,
+        autoPlay: false,
       ),
       itemBuilder: (context, index, realIndex) {
         final item = statsData[index];
@@ -65,6 +111,7 @@ class HomeHealthStats extends StatelessWidget {
   }
 }
 
+// --- WIDGET CARD CON ---
 class StatCard extends StatelessWidget {
   final String label;
   final String value;
@@ -81,76 +128,78 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Color valueColor = Colors.black87;
+    if (["Có cao HA", "Thiếu rau", "Ít vận động", "Cần chú ý"].contains(value)) {
+      valueColor = Colors.orange.shade900;
+    } else if (["Lành mạnh", "Tích cực", "Tuyệt vời", "Rất tốt"].contains(value)) {
+      valueColor = Colors.green.shade700;
+    }
+
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-      padding: const EdgeInsets.all(8), // Giảm padding chút cho đỡ chật
+      margin: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 10.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+            spreadRadius: 1,
           ),
         ],
       ),
-      // --- PHẦN QUAN TRỌNG NHẤT ---
-      // Căn giữa nội dung
-      alignment: Alignment.center, 
-      child: FittedBox(
-        // FittedBox: "Thần chú" chống tràn. 
-        // Nó sẽ scale nội dung nhỏ lại nếu thẻ bị bé đi.
-        fit: BoxFit.scaleDown, 
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Icon
-            Image.asset(
-              iconPath,
-              width: 34, 
-              height: 34,
-              fit: BoxFit.contain,
-              gaplessPlayback: true,
-              errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.broken_image, size: 34, color: Colors.grey),
-            ),
-            
-            const SizedBox(height: 6), // Giảm khoảng cách chút
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            iconPath,
+            width: 36,
+            height: 36,
+            fit: BoxFit.contain,
+            cacheWidth: 100,
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.info, size: 36, color: Colors.grey),
+          ),
+          
+          const Spacer(),
 
-            // Giá trị (Value)
-            Text(
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 18,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
                 fontWeight: FontWeight.w800,
-                color: Colors.black87,
+                color: valueColor,
+                height: 1.2,
               ),
             ),
+          ),
 
-            // Đơn vị (Unit)
-            if (unit != null) ...[
-              const SizedBox(height: 2),
-              Text(
-                unit!,
-                style: const TextStyle(fontSize: 10, color: Colors.grey),
-              ),
-            ],
-
-            const SizedBox(height: 4),
-
-            // Label
+          if (unit != null) ...[
+            const SizedBox(height: 2),
             Text(
-              label,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF007BFF),
-              ),
+              unit!,
+              style: TextStyle(fontSize: 10, color: Colors.grey[600], fontWeight: FontWeight.w500),
             ),
           ],
-        ),
+
+          const Spacer(),
+
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF007BFF),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 
 class AdviceHelper {
-  /// Hàm trả về bộ dữ liệu: Tiêu đề, Màu sắc, và Nội dung chi tiết
   static Map<String, dynamic> getAdvice(int prediction, double bmi) {
     if (prediction == 1) {
       return _getHighRiskAdvice(bmi);
@@ -12,49 +11,56 @@ class AdviceHelper {
     }
   }
 
-  // --- 1. LỜI KHUYÊN CHO NGƯỜI CÓ NGUY CƠ CAO ---
+  // --- 1. PHÁC ĐỒ CHO NGUY CƠ CAO (Văn phong Y khoa) ---
   static Map<String, dynamic> _getHighRiskAdvice(double bmi) {
     String specificBmiAdvice = "";
     if (bmi >= 25) {
-      specificBmiAdvice = "\n• Giảm cân: Bạn đang thừa cân/béo phì. Giảm 5-7% trọng lượng cơ thể sẽ giảm 50% nguy cơ tiến triển thành bệnh.";
+      specificBmiAdvice = "- Kiểm soát cân nặng: Chỉ số BMI hiện tại ở mức thừa cân/béo phì. Mục tiêu giảm 5-7% trọng lượng cơ thể để cải thiện độ nhạy Insulin.";
     }
 
     return {
       "label": "NGUY CƠ CAO",
       "color": Colors.red,
       "content": 
-        "Kết quả phân tích cho thấy bạn có nhiều yếu tố nguy cơ liên quan đến tiền tiểu đường hoặc tiểu đường type 2.\n\n"
-        "🚑 HÀNH ĐỘNG NGAY LẬP TỨC:\n"
-        "• Đi khám bác sĩ: Đừng hoang mang! Hãy đến bệnh viện để xét nghiệm máu (HbA1c và Glucose lúc đói) để có kết quả chính xác nhất.\n"
-        "• Theo dõi triệu chứng: Chú ý xem bạn có hay khát nước, đi tiểu nhiều, sụt cân bất thường hay mệt mỏi không.\n\n"
-        "🥗 ĐIỀU CHỈNH CHẾ ĐỘ ĂN:\n"
-        "• Cắt giảm đường: Ngưng uống nước ngọt, trà sữa, bánh kẹo ngọt ngay hôm nay.\n"
-        "• Giảm tinh bột nhanh: Hạn chế cơm trắng, bánh mì trắng. Thay bằng gạo lứt, khoai lang, yến mạch.\n"
-        "• Tăng chất xơ: Ăn rau xanh trong mọi bữa ăn (bông cải, rau muống, dưa leo).$specificBmiAdvice\n\n"
-        "🏃 CHẾ ĐỘ VẬN ĐỘNG:\n"
-        "• Dành ít nhất 30 phút mỗi ngày để đi bộ nhanh, đạp xe hoặc bơi lội."
+        "Kết quả phân tích cho thấy các chỉ số của bạn có độ tương quan cao với nhóm bệnh lý Tiểu đường Type 2. Dưới đây là phác đồ khuyến nghị:\n\n"
+        
+        "I. KHUYẾN NGHỊ Y KHOA\n"
+        "- Thăm khám chuyên khoa: Cần đến cơ sở y tế gần nhất để thực hiện xét nghiệm chẩn đoán xác định (HbA1c, Glucose lúc đói).\n"
+        "- Theo dõi lâm sàng: Lưu ý các triệu chứng như khát nước liên tục, đi tiểu nhiều (đa niệu), mệt mỏi mạn tính hoặc sụt cân không rõ nguyên nhân.\n\n"
+
+        "II. ĐIỀU CHỈNH DINH DƯỠNG\n"
+        "- Loại bỏ đường đơn: Ngưng sử dụng nước ngọt có gas, bánh kẹo và thực phẩm chế biến sẵn chứa đường tinh luyện.\n"
+        "- Kiểm soát tinh bột (Carb): Thay thế gạo trắng, bánh mì bằng ngũ cốc nguyên hạt (gạo lứt, yến mạch) để giảm chỉ số đường huyết (GI).\n"
+        "- Tăng cường chất xơ: Bổ sung rau xanh trong mọi khẩu phần ăn để làm chậm quá trình hấp thu đường.\n"
+        "$specificBmiAdvice\n\n"
+
+        "III. VẬN ĐỘNG TRỊ LIỆU\n"
+        "- Duy trì hoạt động thể chất cường độ trung bình ít nhất 150 phút/tuần (đi bộ nhanh, bơi lội)."
     };
   }
 
-  // --- 2. LỜI KHUYÊN CHO NGƯỜI AN TOÀN ---
+  // --- 2. CHIẾN LƯỢC CHO NGƯỜI AN TOÀN ---
   static Map<String, dynamic> _getSafeAdvice(double bmi) {
     String specificBmiAdvice = "";
     if (bmi >= 25) {
-      specificBmiAdvice = "\n⚠️ Lưu ý nhỏ: Tuy nguy cơ tiểu đường thấp nhưng BMI của bạn đang ở mức thừa cân. Hãy cố gắng tập luyện để về vóc dáng chuẩn nhé!";
+      specificBmiAdvice = "- Lưu ý chỉ số BMI: Mặc dù nguy cơ tiểu đường thấp, nhưng thể trạng thừa cân có thể dẫn đến các vấn đề tim mạch. Cần điều chỉnh để về mức chuẩn (18.5 - 24.9).";
     }
 
     return {
       "label": "AN TOÀN",
       "color": Colors.green,
       "content": 
-        "Chúc mừng! Dựa trên các chỉ số sức khỏe, hiện tại bạn có nguy cơ thấp với bệnh tiểu đường.\n\n"
-        "🛡️ ĐỂ DUY TRÌ SỨC KHỎE TỐT:\n"
-        "• Kiểm tra định kỳ: Đừng chủ quan, hãy khám sức khỏe tổng quát 6 tháng/lần.\n"
-        "• Uống đủ nước: Đảm bảo uống 1.5 - 2 lít nước mỗi ngày để hỗ trợ trao đổi chất.\n"
-        "• Ngủ đủ giấc: Giấc ngủ tốt giúp ổn định đường huyết và giảm căng thẳng.$specificBmiAdvice\n\n"
-        "🍎 CHẾ ĐỘ DINH DƯỠNG:\n"
-        "• Ăn uống đa dạng: Cân bằng giữa đạm (thịt, cá), tinh bột và rau củ.\n"
-        "• Hạn chế ăn đêm: Cố gắng không ăn sau 8 giờ tối để cơ thể được nghỉ ngơi."
+        "Các chỉ số phân tích hiện tại nằm trong ngưỡng an toàn. Tuy nhiên, việc duy trì lối sống lành mạnh là yếu tố tiên quyết để phòng ngừa bệnh.\n\n"
+
+        "I. CHIẾN LƯỢC DỰ PHÒNG\n"
+        "- Tầm soát định kỳ: Thực hiện kiểm tra sức khỏe tổng quát 6 tháng/lần để phát hiện sớm các bất thường.\n"
+        "- Bù nước và điện giải: Đảm bảo cung cấp đủ 1.5 - 2 lít nước mỗi ngày để hỗ trợ quá trình chuyển hóa.\n"
+        "$specificBmiAdvice\n\n"
+
+        "II. CHẾ ĐỘ SINH HOẠT\n"
+        "- Dinh dưỡng cân bằng: Duy trì tỷ lệ hợp lý giữa Đạm (Protein), Tinh bột (Carb) và Chất béo tốt (Lipid).\n"
+        "- Giấc ngủ: Đảm bảo ngủ đủ 7-8 tiếng/ngày để ổn định nội tiết tố và đường huyết.\n"
+        "- Hạn chế ăn đêm: Tránh nạp năng lượng sau 20:00 để cơ quan tiêu hóa được nghỉ ngơi."
     };
   }
 }
