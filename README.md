@@ -1,38 +1,70 @@
-# 🏥 GlucoAI - Hệ Thống Dự Đoán Nguy Cơ Tiểu Đường
+# 🏥 GlucoAI - Diabetes Risk Prediction System
 
-GlucoAI là một ứng dụng di động tích hợp trí tuệ nhân tạo (AI) giúp người dùng dự đoán nguy cơ mắc bệnh tiểu đường dựa trên các chỉ số sức khỏe cá nhân.
+**GlucoAI** is an AI-powered mobile application designed to help users assess their risk of diabetes based on personal health metrics.
 
-## 🚀 Kiến Trúc Dự Án
+<img width="2752" height="1536" alt="glucoai" src="https://github.com/user-attachments/assets/b69668c3-dd6a-4415-a713-46e9ca6dd8e7" />
 
-Dự án được chia làm hai phần chính:
-* **Mobile App**: Phát triển bằng **Flutter**, cung cấp giao diện người dùng thân thiện.
-* **AI Service**: Phát triển bằng **FastAPI**, triển khai mô hình **XGBoost** để đưa ra dự đoán.
+## 🚀 System Architecture
+
+The project is architected into two main components:
+* **Mobile App**: Built with **Flutter**, providing a seamless and intuitive user experience.
+* **AI Service**: Developed using **FastAPI**, deploying an **XGBoost** model to deliver real-time risk predictions.
 
 ---
 
-## 🛠 Công Nghệ Sử Dụng
+## 🛠 Tech Stack
 
 ### Frontend (Mobile)
 * **Framework**: Flutter
-* **State Management**: Provider/Bloc (tùy chỉnh)
-* **Communication**: HTTP (REST API)
+* **State Management**: Provider / BLoC
+* **Communication**: RESTful API (HTTP)
 
 ### Backend (AI Service)
 * **Language**: Python 3.9+
 * **Framework**: FastAPI
-* **AI Library**: XGBoost, Scikit-learn, Pandas
-* **Deployment**: Hugging Face Spaces (Docker)
+* **Machine Learning**: XGBoost, Scikit-learn, Pandas
+* **Deployment**: Dockerized on Hugging Face Spaces
 
 ---
 
-## 📂 Cấu Trúc Thư Mục
+## 🖼 UI & System Preview
+
+### 📱 1. Home Dashboard
+<p align="center">
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/c0074e71-858a-4cf0-b877-b0a4678db01b" />
+</p>
+
+---
+
+### 📊 2. Prediction Results
+<p align="center">
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/fd38c242-4b4e-48e8-b5aa-7be7e5a08283" />
+</p>
+
+---
+
+### 🧠 3. Assessment History
+<p align="center">
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/ca5dc99b-0714-4b07-9ae6-43873b89614a" />
+</p>
+
+---
+
+### 🚀 4. Settings
+<p align="center">
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/10aefb2d-c947-4cbd-a99e-a74b34ebe66f" />
+</p>
+
+---
+
+## 📂 Project Structure
 
 ```text
 GlucoAI/
-├── mobile_app/          # Mã nguồn ứng dụng Flutter
-├── ai_service/          # Mã nguồn Backend & AI Model
-│   ├── models/          # Chứa file model .pkl hoặc .joblib
-│   ├── main.py          # API khởi tạo bởi FastAPI
-│   ├── requirements.txt # Danh sách thư viện Python
-│   └── Dockerfile       # Cấu hình triển khai Hugging Face
-└── README.md            # Tài liệu hướng dẫn dự án
+├── mobile_app/          # Flutter application source code
+├── ai_service/          # Backend & AI Model source code
+│   ├── models/          # Serialized models (.pkl or .joblib)
+│   ├── main.py          # FastAPI entry point
+│   ├── requirements.txt # Python dependencies
+│   └── Dockerfile       # Deployment configuration for Hugging Face
+└── README.md            # Project documentation
