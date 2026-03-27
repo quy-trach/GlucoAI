@@ -113,7 +113,7 @@ class _AccountPageState extends State<AccountPage> {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            // TEXT
+                            // TEXT -- TÊN VÀ LỜI CHÀO
                             Expanded(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
